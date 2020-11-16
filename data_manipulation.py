@@ -19,7 +19,7 @@ data_f = pd.DataFrame(columns = data_.columns)
 
 
 for i in range(len(name_of_country)):
-    data_f = data_f.append(data_.loc[data_['iso_code'] == name_of_country[i]])
+    data_f = data_f.append(data_.loc[(data_['iso_code'] == name_of_country[i]) & (data_['year'] >= 1950)])
 
 data_f_2 = data_f[columns_names]
-data_f_3 = data_f_2.loc[data_f_2['year'] >= 1950]
+#data_f_3 = data_f_2.loc[data_f_2['year'] >= 1950]
