@@ -1,9 +1,20 @@
 ---
-title: "project"
-output: pdf_document
+title: \vspace{3in}BDA - Assignment 9
+author: "Anonymous"
+output: 
+  pdf_document: 
+    toc: true
+    toc_depth: 1
+    includes:
+      before_body: latex/before_body.tex
+    extra_dependencies: ["amsmath"]
 ---
 
-```{r}
-library(rstan)
-```
+\newpage
 
+```{r message=FALSE}
+library(rstan)
+library(aaltobda)
+data("factory")
+SEED <- 12345
+writeLines(readLines("assignment9_hierarchical_model.stan"))
