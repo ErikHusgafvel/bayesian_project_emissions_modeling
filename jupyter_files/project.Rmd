@@ -1,0 +1,9 @@
+---
+title: "project"
+output: pdf_document
+---
+
+```{r}
+library(rstan)
+```
+
