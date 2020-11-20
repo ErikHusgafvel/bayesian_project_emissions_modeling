@@ -3,7 +3,21 @@ title: "project"
 output: pdf_document
 ---
 
-```{r}
-library(rstan)
+```{r message=FALSE}
+num_of_chains = 10
+hier_model <- rstan::stan_model(file = "assignment9_hierarchical_model.stan")
+hier_data <- list(N = nrow(factory),
+                  J = ncol(factory),
+                  y = factory)
+hier_fit <- rstan::sampling(object = hier_model,
+                            data = hier_data,
+                            iter = 5000,
+                            warmup = 1000,
+                            chains = num_of_chains,
+                            verbose = FALSE,
+                            refresh = 0,
+                            show_messages = FALSE,
+                            seed = SEED)
 ```
+
 
