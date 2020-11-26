@@ -43,21 +43,26 @@ library(gridExtra)
 
 ```{r}
 # Read data to data frame
-data <- read.csv("./data_co2.csv")
+data_co2 <- read.csv("./data_co2.csv")
+data_population <- head(read.csv("./data_population.csv"), -1)
 
 # We discovered that the CO2-emissions difference between our selected countries is so vast
 # that it's better to split the data into two different plots.
 
-df_data1 <- data[, (data[dim(data)[1], ]) >= 100]
+df_data1 <- data_co2[, (data_co2[dim(data_co2)[1], ]) >= 100]
 df_data1 <- df_data1[,order(df_data1[69,])]
 df_data1_2 <- data.frame(years=seq(1950,2018), df_data1)
 df_plot1 <- melt(data = df_data1_2, id.vars = "years", variable.name = "country")
 
 
-df_data2 <- data[, (data[dim(data)[1], ]) < 100]
+df_data2 <- data_co2[, (data_co2[dim(data_co2)[1], ]) < 100]
 df_data2 <- df_data2[,order(df_data2[69,])]
 df_data2_2 <- data.frame(years=seq(1950,2018), df_data2)
 df_plot2 <- melt(data = df_data2_2, id.vars = "years", variable.name = "country")
+
+# Population
+df_data3 <- data.frame(years=seq(1950,2018), data_population)
+df_plot3 <- melt(data = df_data3, id.vars = "years", variable.name = "country")
 
 
 plot1 <- ggplot(df_plot1, aes(x=years, y=value, colour=country)) +
@@ -72,7 +77,18 @@ plot2 <- ggplot(df_plot2, aes(x=years, y=value, colour=country)) +
         xlab("Year") +
         ylab("CO2-emission")
 
-grid.arrange(plot1, plot2, ncol=2)
+plot3 <- ggplot(df_plot3, aes(x=years, y=value, colour=country)) +
+        geom_line() +
+        ggtitle("Selected countries' population development") +
+        xlab("Year") +
+        ylab("Population")
+
+grid.arrange(
+  grobs = list(plot1, plot2, plot3),
+  layout_matrix = rbind(c(1, 1, 2, 2, NA),
+                        c(1, 1, 2, 2, NA),
+                        c(3, 3, 3, 3, 3))
+)
 
 ```
 
