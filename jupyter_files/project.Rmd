@@ -16,7 +16,7 @@ output:
 
 # 1. Introduction
 
-One of the biggest challenges of humankind in the 2020s is figuring out ways to slow down the growth of greenhouse gas emissions and stop global warming (due to human activities) under 2 $^{\circ}$C. The increasing trend of global temperature is easily seen in Figure \ref{fig:global_temp} [cite NASA] in which the global surface temperature is illustrated relative to 1951-1980 average temperatures. Warming can also be seen with one's own eyes by observing the winters that are warming year by year, by noticing that the number of devastating hurricanes is increased, and by finding out the increased rate of ice melting in glacier's summer.
+One of the biggest challenges of humankind in the 2020s is figuring out ways to slow down the growth of greenhouse gas emissions and stop global warming (due to human activities) under 2 $^{\circ}$C. The increasing trend of global temperature is easily seen in Figure \ref{fig:global_temp} [cite NASA] in which the global surface temperature is illustrated relative to 1951-1980 average temperatures. Warming can also be seen with one's own eyes by observing the winters that are warming year by year, by noticing that the number of devastating hurricanes is increased, and by finding out the increased rate of ice melting in glaciers during summer.
 
 ```{r globaltemp, echo=FALSE, fig.cap="\\label{fig:global_temp}Global Land-Ocean Temperature Index", out.width = '100%'}
 knitr::include_graphics("GlobalTemp.png")
@@ -39,40 +39,28 @@ library(rstan)
 library(ggplot2)
 library(reshape2)
 library(gridExtra)
-#library(aaltobda)
-#data("factory")
 ```
 
 ```{r}
 # Read data to data frame
 data <- read.csv("./data_co2.csv")
-# Our exploratory data analysis discovered some missing values. In order to
-# avoid errors, we'll replace them with zeros.
-data[is.na(data)] <- 0
-
 
 # We discovered that the CO2-emissions difference between our selected countries is so vast
 # that it's better to split the data into two different plots.
 
 df_data1 <- data[, (data[dim(data)[1], ]) >= 100]
-# Sorting the columns in ascending order based on the last row value
 df_data1 <- df_data1[,order(df_data1[69,])]
 df_data1_2 <- data.frame(years=seq(1950,2018), df_data1)
-
-# Plot the result
 df_plot1 <- melt(data = df_data1_2, id.vars = "years", variable.name = "country")
 
+
 df_data2 <- data[, (data[dim(data)[1], ]) < 100]
-# Sorting the columns in ascending order based on the last row value
 df_data2 <- df_data2[,order(df_data2[69,])]
 df_data2_2 <- data.frame(years=seq(1950,2018), df_data2)
-
-# Plot the result
 df_plot2 <- melt(data = df_data2_2, id.vars = "years", variable.name = "country")
 
 
-# Plot the countries
-plot1 <- ggplot(df_plot1, aes(x=years, y=value, colour=country), environment = ) +
+plot1 <- ggplot(df_plot1, aes(x=years, y=value, colour=country)) +
         geom_line() +
         ggtitle("Selected countries' co2-emissions: \nbig emitters") +
         xlab("Year") +
