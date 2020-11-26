@@ -11,7 +11,7 @@ import numpy as np
 columns_names = ["iso_code", "country", "year" ,"co2"]
 
 name_of_country = ["URY", "PER", "CUB", "USA",  "ISL", "FIN", "FRA", "GRC", "MAR", 
-                   "ZAF", "CMR", "SAU", "IND", "MNG", "HKG", "JPN", "SGP", "NZL", "FJI"
+                   "ZAF", "CMR", "SAU", "IND", "MNG", "HKG", "JPN", "CHN", "NZL", "FJI"
 ]
 
 data_ = pd.read_csv("owid-co2-data.csv")
