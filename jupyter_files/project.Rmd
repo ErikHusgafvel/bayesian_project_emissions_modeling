@@ -79,11 +79,32 @@ grid.arrange(plot1, plot2, ncol=2)
 
 
 
-
-
-
-
 Example code for hierarchical model from assignment
+```{r}
+vectored_data <- df_plot2[,'value']
+N <- 828
+```
+
+```{stan output.var=hiermodel}
+data {
+        int <lower=0> N; // number of datapoints
+        vector[N] y; //  quality control measurements  
+}
+
+parameters {
+        
+}
+
+model {
+
+}
+
+generated quantities {
+
+} 
+```
+
+
 
 ```{r message=FALSE}
 # # Setting seed to get same "random" results
