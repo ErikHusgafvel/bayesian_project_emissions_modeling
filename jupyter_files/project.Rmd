@@ -91,6 +91,33 @@ grid.arrange(
 )
 
 ```
+```{r}
+data_c02_population = data_co2*10^6/data_population
+
+df_data4 <- data_c02_population[, (data_co2[dim(data_co2)[1], ]) >= 100]
+df_data4 <- df_data4[,order(df_data4[69,])]
+df_data4_2 <- data.frame(years=seq(1950,2018), df_data4)
+df_plot4 <- melt(data = df_data4_2, id.vars = "years", variable.name = "country")
+
+df_data5 <- data_c02_population[, (data_co2[dim(data_co2)[1], ]) < 100]
+df_data5 <- df_data5[,order(df_data5[69,])]
+df_data5_2 <- data.frame(years=seq(1950,2018), df_data5)
+df_plot5 <- melt(data = df_data5_2, id.vars = "years", variable.name = "country")
+
+plot4 <- ggplot(df_plot4, aes(x=years, y=value, colour=country)) +
+        geom_line() +
+        ggtitle("co2 / population development big") +
+        xlab("Year") +
+        ylab("co2 per capita")
+
+plot5 <- ggplot(df_plot5, aes(x=years, y=value, colour=country)) +
+        geom_line() +
+        ggtitle("co2 / Population development small") +
+        xlab("Year") +
+        ylab("co2 per capita")
+plot4
+plot5
+```
 
 
 
@@ -110,8 +137,8 @@ parameters {
 }
 
 model {
-    mu ~ normal(0, 10); // priors from last week
-    sigma ~ inv_chi_square(10); // priors from last week
+    mu ~ lognormal(0, 10); // priors from last week
+    sigma ~ inv_chi_square(1); // priors from last week
   
   
   // pooled model likelihood, common mu and sigma for all observations
@@ -126,12 +153,44 @@ generated quantities {
   //predictive distribution for any machine
     ypred = normal_rng(mu, sigma);
   
-  for (i in 1:N){
-      log_lik[i] = normal_lpdf(y[i] | mu, sigma);
-  }
+  //for (i in 1:N){
+  //    log_lik[i] = normal_lpdf(y[i] | mu, sigma);
+  //}
 }
 
 ```
+
+```{stan output.var=linearmodel}
+// Hierarchical model
+data {
+      int<lower=0> N ;             // number of observations
+      int<lower=0> J ;             // number of countries
+      vector[N] x;                //  observation  years
+      vector[J] y[N] ;             // real valued observations
+}
+parameters {
+      vector[J] alpha;
+      vector[J] beta;
+      real<lower=0> sigma;
+}
+transformed parameters {
+      for (j in 1:J){
+            vector[N] mu = alpha[j] + beta[j]*x;
+      }
+}
+model {
+      sigma ~ gamma(1,1);  // prior sd
+      for (j in 1:J){
+            alpha[j] ~ normal(0,27);
+            beta[j] ~ normal(0,27);
+      }
+      
+      for (j in 1:J) {
+            y[ ,j] ~ normal(mu[j], sigma) ; // likelihood
+      }
+}
+```
+
 
 
 
@@ -153,10 +212,17 @@ pool_fit <- rstan::sampling(object = pooledmodel,
                             data = pool_data,
                             iter = 2000,
                             warmup = 1000,
-                            #chains = num_of_chains,
-                            #verbose = FALSE,
-                            #refresh = 0,
-                            #show_messages = FALSE,
+                            seed = SEED)
+
+linear_data <- list(N = N,
+                    J = 19,
+                    x = seq(1950,2018),
+                    y = data_c02_population)
+
+pool_fit <- rstan::sampling(object = linearmodel,
+                            data = linear_data,
+                            iter = 2000,
+                            warmup = 1000,
                             seed = SEED)
 ```
 
