@@ -5,14 +5,13 @@ bibliography: bibliography.bib
 output:
  pdf_document:
    toc: true
-   toc_depth: 1
+   toc_depth: 2
    includes:
      before_body: latex/before_body.tex
    extra_dependencies: ["amsmath"]
 ---
 
 \newpage
-
 
 # 1. Introduction
 
@@ -32,16 +31,31 @@ In this project, our goal is to model the historical emission trends of selected
 
 Our CO$_2$ data was obtained from \textit{Our World in Data} (OWID) web page [cite OWID_net] and the actual \textit{CSV} file from OWID GitHub page [cite OWID_git]. As mentioned earlier, climate change is a hot topic in the daily news, and there is a lot of studies and research concerning how CO$_2$ emissions are influencing global warming. The data set was also used, for example, when researchers studied the climate impact of the different policy recommendation which targeted to reduce greenhouse gases from the atmosphere.
 
-In our modeling, we are going to select 19 different countries from that OWID data set and examine CO$_2$ data between the years 1950-2018. The countries we have chosen cover the whole globe and are roughly evenly distributed across continents. There are both small and large polluters among the countries.
+## 2.1 Choosing the sample and estimating it's resemblance
 
-```{r message=FALSE}
+In our modeling, we selected 19 different countries from the OWID data set and examined CO$_2$ data between the years 1950-2018. We decided to not take all countries into the modeling as the are holes and missing information in the dataset. The countries we chose cover the whole globe and are roughly evenly distributed across continents. However, we estimated that the data is probably more reliable in the western countries and thus were more open-minded in selecting them. Even that said, we think that the geographical distribution covers the whole world pretty well. Another important aspect of division is the division between large and small emitters. Even though it is quite difficult to perform such division, we tried to take countries from both ends pretty evenly. However, it is worth noting that this division was performed intuitively and it does not rely on any actual metrics. Lastly, we thought that the division between developing and western countries is extremely important to consider too. Therefore, this aspect was taken into account when considering the sample countries, too. We estimated that the number of developing countries in the world exceeds the number of western countries and thus tried to choose developing countries a bit more into the sample set.
+
+For the reasons presented above, we believe that the sample we use in this project, resembles the situation in the world quite well. However, we estimated that it is possible that the sample is slightly biased towards western countries. It is important to note this since we examine results where the CO2-emissions data is standardized with the countries' population. As the CO2-emissions are standardized, the importance of correct ratio (number) of countries between different division-aspects increases. As the sample may
+be a bit biased, the results may propose higher numbers of CO2-emissions per capita in the world than what they actually are.
+
+## 2.2 Plotting the sample
+
+Below is plotted three graphs. On the first row, we investigate our sample countries' CO2-emissions by country. Please note
+the y-axis difference between large and small emitters in the graphs. It is worth noting that the CO2-emissions development of China
+is very concerning as it has almost doubled its CO2-emissions during the last 15 years. In addition, India, Greece, Morocco, Peru and Mongolia has been showing a bit concerning trend during last decades.
+
+On the second row, we plotted the sample countries' emission standardized with the population of the country. Thus, we obtained
+a "CO2 per capita" -estimate for each country. This is the data that we used later in our models. Especially between 1950s and 70s, western countries play significant role as the big emitters. However, during 2000s, the situation has changed as western countries have systematically been able to lower their emissions per capita. At the same time, developing countries have been increasing their
+emissions and thus the situation has tied.
+
+```{r echo=FALSE, message=FALSE}
 library(rstan)
 library(ggplot2)
 library(reshape2)
 library(gridExtra)
 ```
 
-```{r}
+```{r echo=FALSE}
 # Read data to data frame
 data_co2 <- read.csv("./data_co2.csv")
 data_population <- head(read.csv("./data_population.csv"), -1)
@@ -78,7 +92,7 @@ df_plot4 <- melt(data = df_data4, id.vars = "years", variable.name = "Country")
 
 plot1 <- ggplot(df_plot1, aes(x=years, y=value, colour=Country)) +
         geom_line() +
-        ggtitle("Selected countries' co2-emissions: \nbig emitters") +
+        ggtitle("Plot 1. \nSample countries' CO2-emissions: \nbig emitters") +
         xlab("Year") +
         ylab("CO2-emissions / Billion tonns") +
         labs(colour = "IOC Country Code") +
@@ -88,7 +102,7 @@ plot1 <- ggplot(df_plot1, aes(x=years, y=value, colour=Country)) +
 
 plot2 <- ggplot(df_plot2, aes(x=years, y=value, colour=Country)) +
         geom_line() +
-        ggtitle("Selected countries' co2-emissions: \nsmall emitters") +
+        ggtitle("Plot 2. \nSample countries' CO2-emissions: \nsmall emitters") +
         xlab("Year") +
         ylab("CO2-emissions / Billion tonns") +
         labs(colour = "IOC Country Code") +
@@ -104,7 +118,7 @@ plot2 <- ggplot(df_plot2, aes(x=years, y=value, colour=Country)) +
 
 plot4 <- ggplot(df_plot4, aes(x=years, y=value, colour=Country)) +
         geom_line() +
-        ggtitle("CO2 / Population Development") +
+        ggtitle("Plot 3. \nStandardized CO2-emissions") +
         xlab("Year") +
         ylab("CO2 Per Capita / Kilo tonns") +
         labs(colour = "IOC Country Code") +
@@ -119,7 +133,7 @@ plot4 <- ggplot(df_plot4, aes(x=years, y=value, colour=Country)) +
 #         ylab("co2 per capita")
 ```
 
-```{r fig1, fig.height=12, fig.width=10, fig.align="center"}
+```{r fig1, fig.height=12, fig.width=10, fig.align="center", echo=FALSE}
 
 grid.arrange(
   grobs = list(plot1, plot2, plot4),
