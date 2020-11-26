@@ -80,54 +80,68 @@ grid.arrange(plot1, plot2, ncol=2)
 
 
 Example code for hierarchical model from assignment
-```{r}
-vectored_data <- df_plot2[,'value']
-N <- 828
-```
 
-```{stan output.var=hiermodel}
+
+```{stan output.var=pooledmodel}
 data {
-        int <lower=0> N; // number of datapoints
-        vector[N] y; //  quality control measurements  
+  int <lower=0> N; // number of observations
+  vector[N] y; // observations
 }
 
 parameters {
-        
+  real mu;
+  real<lower=0> sigma;
 }
 
 model {
-
+    mu ~ normal(0, 10); // priors from last week
+    sigma ~ inv_chi_square(10); // priors from last week
+  
+  
+  // pooled model likelihood, common mu and sigma for all observations
+    y ~ normal(mu, sigma);
 }
 
-generated quantities {
 
-} 
+generated quantities {
+  real ypred;
+  vector[N] log_lik;
+  
+  //predictive distribution for any machine
+    ypred = normal_rng(mu, sigma);
+  
+  for (i in 1:N){
+      log_lik[i] = normal_lpdf(y[i] | mu, sigma);
+  }
+}
+
 ```
 
 
 
 ```{r message=FALSE}
-# # Setting seed to get same "random" results
-# SEED <- 12345
-# 
+# Setting seed to get same "random" results
+SEED <- 12345
+
+vectored_data <- data.frame(df_plot2[,'value'])
+N <- nrow(vectored_data)
+
 # # Printing out our hierarchical model
 # writeLines(readLines("assignment9_hierarchical_model.stan"))
-# 
-# 
-# num_of_chains = 10
-# hier_model <- rstan::stan_model(file = "assignment9_hierarchical_model.stan")
-# hier_data <- list(N = nrow(factory),
-#                   J = ncol(factory),
-#                   y = factory)
-# hier_fit <- rstan::sampling(object = hier_model,
-#                             data = hier_data,
-#                             iter = 5000,
-#                             warmup = 1000,
-#                             chains = num_of_chains,
-#                             verbose = FALSE,
-#                             refresh = 0,
-#                             show_messages = FALSE,
-#                             seed = SEED)
+
+
+num_of_chains = 4
+pool_data <- list(N = N,
+                  y = vectored_data[,1])
+pool_fit <- rstan::sampling(object = pooledmodel,
+                            data = pool_data,
+                            iter = 2000,
+                            warmup = 1000,
+                            #chains = num_of_chains,
+                            #verbose = FALSE,
+                            #refresh = 0,
+                            #show_messages = FALSE,
+                            seed = SEED)
 ```
 
 # References
