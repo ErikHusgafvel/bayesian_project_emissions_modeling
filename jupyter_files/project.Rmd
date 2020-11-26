@@ -192,33 +192,99 @@ model {
 
 
 generated quantities {
-  real ypred;
-  //vector[N] log_lik;
+    real ypred;
+    vector[N] log_lik;
   
   //predictive distribution for any machine
     ypred = normal_rng(mu, sigma);
   
-  //for (i in 1:N){
-  //    log_lik[i] = normal_lpdf(y[i] | mu, sigma);
-  //}
+    for (i in 1:N){
+      log_lik[i] = normal_lpdf(y[i] | mu, sigma);
+    }
 }
 
 
+```{stan output.var=hiermodel}
+data {
+    int<lower=0> N;            // Number of observations
+    int<lower=0> N_c;            // Number of countries
+    vector[N_c] y[N];               // Observations
+}
+parameters {
+    vector[N_c] mu; // group means
+    real hyper_mu;             // prior mean
+    real<lower=0> hyper_sigma; // prior std constrained to be positive
+    real<lower=0> sigma;  // COMMON std constrained to be positive
+    
+}
+model {
+    hyper_mu ~ normal(0, 100);     // weakly informative hyper-prior
+    hyper_sigma ~ inv_chi_square(1);   // weakly informative hyper-prior
+    
+    mu ~ normal(hyper_mu, hyper_sigma); // population prior with unknown parameters   
+    sigma ~ inv_chi_square(1); // weakly informative prior for group (common) std
+    
+    for (j in 1:N_c) {
+          y[ ,j] ~ normal(mu[j], sigma); // likelihood
+    }
+    
+}
+//generated  quantities {
+//real y_pred;
+//    y_pred = normal_rng(hyper_mu, sigma);
+//}
+
+
+```
+
 
 ```{r message=FALSE}
-# Setting seed to get same "random" results
-SEED <- 12345
 
-vectored_data <- data.frame(df_plot2[,'value'])
-N <- nrow(vectored_data)
+df_data <- data.frame(years=seq(1950,2018), data_co2_population)
+df_plot <- melt(data = df_data, id.vars = "years", variable.name = "country")
+vectored_data_pop <- data.frame(df_plot[,'value'])
+N <- nrow(vectored_data_pop)
+
 
 # # Printing out our hierarchical model
 # writeLines(readLines("assignment9_hierarchical_model.stan"))
 
-
 num_of_chains = 4
+
 pool_data <- list(N = N,
-                  y = vectored_data[,1])
+                  y = vectored_data_pop[,1])
+
+pool_model <- rstan::stan_model(file = "pooled_model_stan.stan")
+
+pool_fit <- rstan::sampling(object = pool_model,
+                            data = pool_data,
+                            iter = 2000,
+                            warmup = 1000)
+
+hier_data <- list(N = nrow(data_co2_population),
+                  N_c = ncol(data_co2_population),
+                  y = data_co2_population)
+
+hier_fit <- rstan::sampling(object = hiermodel,
+                            data = hier_data,
+                            iter = 2000,
+                            warmup = 1000,
+                            refresh = 0)
+monitor(pool_fit)
+monitor(hier_fit)
+
+pooled_df =data.frame(rstan::extract(pool_fit, permuted=FALSE))
+# Plot the posterior distribution of
+# the mean of the quality measurements of the sixth machine
+pooled_post =c(pooled_df$chain.1.mu,
+               pooled_df$chain.2.mu,
+               pooled_df$chain.3.mu,
+               pooled_df$chain.4.mu)
+hist(pooled_post, 
+     breaks = 30,
+     xlab = "Mean of the quality measurements",
+     col = "lightyellow",
+     main="Posterior distribution of the mean of the sixth machine")
 
 pool_model <- rstan::stan_model(file = "pooled_model_stan.stan")
 
