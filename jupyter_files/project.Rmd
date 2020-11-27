@@ -143,34 +143,35 @@ grid.arrange(
 )
 #plot5
 ```
+# 3 Model description
+In this chapter, we will present our model structures and stan codes of our implementation of a non-hierarchical pooled model and a hierarchical model. Before this, we briefly introduce the mathematical structure behind the models.
 
-```{r}
-data_co2_population = data_co2*10^6/data_population
+## 3.1 Pooled model
+A pooled model is one of the most straightforward model structure to understand. In the pooled model, all data points are used as one "pool" without considering groups or particular features different pieces of data could have. The whole dataset is used as a one, and modeling is done based on that collection of data. If we assume that priors of the mean and standard deviation follow standard normal distributions, we can present the mathematical structure of the pooled model in the form
+\begin{align} \label{eq1}
+     \mu & \sim N(0,1) \\
+     \sigma & \sim N(0,1) \\
+     y_i & \sim N(\mu,\sigma).
+\end{align}
+We used these standardized normal priors just for illustration purposes, and the correct choice of priors we utilized when modeling is presented in chapter 4. Respectively, the pooled model's implementation with probabilistic programming language *Stan* is presented in chapter 5. 
 
-df_data4 <- data.frame(years=seq(1950,2018), data_co2_population)
-df_data4 <- df_data4[,order(df_data4[69,])]
-df_plot4 <- melt(data = df_data4, id.vars = "years", variable.name = "country")
-
-#df_data5 <- data_c02_population[, (data_co2[dim(data_co2)[1], ]) < 100]
-#df_data5 <- df_data5[,order(df_data5[69,])]
-#df_data5_2 <- data.frame(years=seq(1950,2018), df_data5)
-#df_plot5 <- melt(data = df_data5_2, id.vars = "years", variable.name = "country")
-
-plot4 <- ggplot(df_plot4, aes(x=years, y=value, colour=country)) +
-        geom_line() +
-        ggtitle("CO2 / Population Development") +
-        xlab("Year") +
-        ylab("CO2 Per Capita / Kilo tonns")
-
+## 3.2 Hierarchical model
+Unlike the previous model, the hierarchical model takes into account the possibility that some of the subgroups of the whole dataset have similar properties. Due to this observation, the hierarchical model presents a “hyper-prior” that is common to each group. For each group, its posterior distribution of mean is calculated using that hyper-prior, taking into account only all samples belonging to that group. This property can be illustrated in Figure \ref{fig:hier_sketch}. In Figure \ref{fig:hier_sketch}, $\tau$ is a hyper-parameter and $\theta_i$s presents modeled parameter of each group.
+```{r hier, echo=FALSE, fig.cap="\\label{fig:hier_sketch}A hierarchical model -- ", out.width = '100%'}
+knitr::include_graphics("hier_model.png")
 ```
+We can summarize the hierarchical model mathematically as
+\begin{align}\label{eq2}
+     \mu_0 & \sim N(0,1) \\
+     \sigma_0 & \sim N(0,1) \\
+     \mu_i & \sim N(\mu_0, \sigma_0) \\
+     \sigma & \sim N(0,1) \\
+     y_{ji} & \sim N(\mu_i,\sigma)
+\end{align}
+where $mu_0$ and $sigma_0$ are hyper-priors for mean and standard deviation. Again, we used these normal distributions just for illustration purposes. In addition, we assumed through the project that all the groups have a common variance ($\sigma$ in [\ref{eq2}]).
+# 4. Priors
 
-
-
-
-
-Example code for pooled model from assignment
-
-
+# 5. Stan
 data {
   int <lower=0> N; // number of observations
   vector[N] y; // observations
@@ -203,7 +204,7 @@ generated quantities {
     }
 }
 
-
+## 3.2 Hierarchical model
 Example code for hierarchical model
 
 data {
