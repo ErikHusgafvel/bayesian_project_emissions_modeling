@@ -55,6 +55,7 @@ library(reshape2)
 library(gridExtra)
 library(tidyr)
 library(bayesplot)
+library(dplyr)
 ```
 
 ```{r echo=FALSE}
@@ -282,7 +283,8 @@ hier_fit <- rstan::sampling(object = hier_model,
                             data = hier_data,
                             iter = num_of_iter,
                             warmup = num_of_warmup,
-                            refresh = 0)
+                            refresh = 0,
+                            seed = 12345)
 monitor(pool_fit)
 monitor(hier_fit)
 
@@ -294,83 +296,56 @@ check_hmc_diagnostics(hier_fit)
 
 
 ```{r}
-
-pooled_df =data.frame(rstan::extract(pool_fit, permuted=FALSE))
-# Plot the posterior distribution of
-# the mean of the quality measurements of the sixth machine
-pooled_post =c(pooled_df$chain.1.mu,
-               pooled_df$chain.2.mu,
-               pooled_df$chain.3.mu,
-               pooled_df$chain.4.mu)
-hist(pooled_post, 
-     breaks = 30,
-     xlab = "Mean of the quality measurements",
-     col = "lightyellow",
-     main="Posterior distribution of the mean of the sixth machine")
-
-
-hierarchical_df =data.frame(rstan::extract(hier_fit, permuted=T))
-mcmc_areas_df <- data.frame(hierarchical_df$mu.1, 
-                            hierarchical_df$mu.2,
-                            hierarchical_df$mu.3,
-                            hierarchical_df$mu.4,
-                            hierarchical_df$mu.5,
-                            hierarchical_df$mu.6,
-                            hierarchical_df$mu.7,
-                            hierarchical_df$mu.8,
-                            hierarchical_df$mu.9,
-                            hierarchical_df$mu.10,
-                            hierarchical_df$mu.11,
-                            hierarchical_df$mu.12,
-                            hierarchical_df$mu.13,
-                            hierarchical_df$mu.14,
-                            hierarchical_df$mu.15,
-                            hierarchical_df$mu.16,
-                            hierarchical_df$mu.17,
-                            hierarchical_df$mu.18,
-                            hierarchical_df$mu.19) %>%
-  setNames(colnames(data_co2_population))
-mcmc_areas(mcmc_areas_df) + xlab("Testttttttt")
-# Plot the posterior distribution of
-# the mean of the quality measurements of the sixth machine
-hierarchical_post_mu1 =c(hierarchical_df['chain.1.mu.1.'],
-                          hierarchical_df['chain.2.mu.1.'],
-                          hierarchical_df['chain.3.mu.1.'],
-                          hierarchical_df['chain.4.mu.1.'])
-
-hierarchical_post_mu2 =c(hierarchical_df$chain.1.mu.2.,
-                          hierarchical_df$chain.2.mu.2.,
-                          hierarchical_df$chain.3.mu.2.,
-                          hierarchical_df$chain.4.mu.2.)
-
-mu1 <- hist(unlist(hierarchical_post_mu1), plot=FALSE)
-mu2 <- hist(hierarchical_post_mu2, plot=FALSE)
-
-{
-plot(0,0,type="n",xlim=c(0,5), ylim=c(0,2000),xlab="x",ylab="freq", main="Two histograms")
-plot( mu1, col=rgb(0,0,1,1/4), add=TRUE)  # first histogram
-plot( mu2, col=rgb(1,0,0,1/4), add=TRUE)  # second
-}
-
-m <- 3
-hier_matrix <- matrix(NA, nrow = m, ncol = 4*(num_of_iter-num_of_warmup))
-
-for(n in 1:m) {
-  var_name_1 <- paste("chain.1.mu.",n,".", sep="")
-  var_name_2 <- paste("chain.2.mu.",n,".", sep="")
-  var_name_3 <- paste("chain.3.mu.",n,".", sep="")
-  var_name_4 <- paste("chain.4.mu.",n,".", sep="")
+pooled_plotters <- function() {
+  pooled_df =data.frame(rstan::extract(pool_fit, permuted=T))
   
-  data_set <- c(hierarchical_df[var_name_1],
-                hierarchical_df[var_name_2],
-                hierarchical_df[var_name_3],
-                hierarchical_df[var_name_4])
-  
-  hier_matrix[n,] <- unlist(data_set)
+  #Histogram
+  hist(pooled_df$mu, 
+       breaks = 100,
+       xlim=c(0,22),
+       xlab = "Mean of the quality measurements",
+       col = "lightyellow",
+       main="Posterior distribution of the mean of the sixth machine")
 }
+```
 
+```{r}
+hierarchical_plotters <- function() {
+  hierarchical_df =data.frame(rstan::extract(hier_fit, permuted=T))
+  
+  #MCMC Areas
+  mcmc_areas_df <- hierarchical_df %>% select(starts_with('mu')) %>%
+                    setNames(colnames(data_co2_population))
+  mcmc_areas(mcmc_areas_df) + xlab("Testttttttt")
+  
+  #Histograms of countries together
+  m <- 19
+  {
+  plot(0,0,type="n",
+        xlim=c(0,20), ylim=c(0,1100),
+        xlab="x",ylab="freq", 
+        main="Histograms of each country separately, plotted together")
+    for(n in 1:m) {
+      var_name <- paste("mu.",n, sep="")
+      #hier_matrix[n,] <- unlist(hierarchical_df[var_name])
+      plot(
+        hist(unlist(hierarchical_df[var_name]), breaks = 12, plot=FALSE),
+        col=alpha('blue', 0.25),
+        add=T # Add to main plot
+        )  
+    }
+  }
+  
+  #One histogram for whole data
+  one_hist_data <- unlist(hierarchical_df %>% select(starts_with('mu')))
+  plot(hist(one_hist_data, breaks = 100, xlim = c(0,22), ylim = c(0, 5000)),
+            col = 'lightblue')
+
+}
 
 ```
+
+
 
 # References
 
