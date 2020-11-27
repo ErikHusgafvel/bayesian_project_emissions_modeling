@@ -27,14 +27,7 @@ model {
 
 generated  quantities {
     real y_pred;
-    vector[N_c] log_lik[N];
-    
-    
     y_pred = normal_rng(hyper_mu, sigma);
     
-    for (j in 1:N_c) {
-        for (i in 1:N) {
-            log_lik[i, j] = normal_lpdf(y[i,j] | mu[j], sigma);
-        }
-    }
 }
+
