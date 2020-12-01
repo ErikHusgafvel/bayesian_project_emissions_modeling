@@ -155,13 +155,13 @@ In this chapter, we will present our model structures and stan codes of our impl
 
 A pooled model is one of the most straightforward model structure to understand. In the pooled model, all data points are used as one "pool" without considering groups or particular features different pieces of data could have. The whole dataset is used as a one, and modeling is done based on that collection of data. If we assume that priors of the mean and standard deviation follow standard normal distributions, we can present the mathematical structure of the pooled model in the form
 
-$$
-\begin{align} \label{eq1}
+
+\begin{align}\label{eq1}
      \mu & \sim N(0,1) \\
      \sigma & \sim N(0,1) \\
-     y_i & \sim N(\mu,\sigma).
+     y_i & \sim N(\mu,\sigma)
 \end{align}
-$$
+
 
 We used these standardized normal priors just for illustration purposes, and the correct choice of priors we utilized when modeling is presented in chapter 4. Respectively, the pooled model's implementation with probabilistic programming language *Stan* is presented in chapter 5. 
 
@@ -175,7 +175,7 @@ knitr::include_graphics("hier_model.png")
 
 We can summarize the hierarchical model mathematically as
 
-$$
+
 \begin{align}\label{eq2}
      \mu_0 & \sim N(0,1) \\
      \sigma_0 & \sim N(0,1) \\
@@ -183,13 +183,23 @@ $$
      \sigma & \sim N(0,1) \\
      y_{ji} & \sim N(\mu_i,\sigma)
 \end{align}
-$$
+
 
 where $mu_0$ and $sigma_0$ are hyper-priors for mean and standard deviation. Again, we used these normal distributions just for illustration purposes. In addition, we assumed through the project that all the groups have a common variance ($\sigma$ in [\ref{eq2}]).
 
 # 4. Priors
 
+For our modeling, we needed to define hyper priors $\mu_0$ and $\sigma_0$. In addition, common $\sigma$ was defined for the hierarchical model's standard deviation between data points.
 
+Our first goal was to define the hyper prior $\mu_0$. To aid this problem, we searched information in the internet about country-wise CO2-emissions per capita. The figure below illustrates the results that we found. The figure is taken from https://www.economicshelp.org/blog/10296/economics/top-co2-polluters-highest-per-capita/ on the 1st of December, 2020.
+
+```{r co2-emissions-per-capita, echo=FALSE, fig.cap="\\label{fig:co2-emissions-per-capita}Selected countries CO2 emissions per capita \\newline Source: https://www.economicshelp.org/blog/10296/economics/top-co2-polluters-highest-per-capita/ \\newline Accessed December 1, 2020.", out.width = '100%'}
+knitr::include_graphics("co2-emissions-per-capita.png")
+```
+
+Results shown in the figure represent selected countries on year 2016 and are pretty well aligned with the CO2-emissions per capita that we calculated and drew at our data description section. However, it seems that the underlying dataset is not the same that we decided to use in this project. The idea of searching external information from the internet is to obtain a better idea about the underlying truth without having to use our own dataset at this point. We want to emphasize that at this point we used our dataset only to estimate whether our own dataset is aligned with the other information found from the internet or not aligned at all.
+
+With the information that we obtained from investigating the internet more thoroughly, we were able to estimate the order of magnitude for the CO2-emissions pre capita. Considering our range of flunctuation, we can first exclude the results below zero. There won't be negative values in CO2-emissions calculations. On the other end, we estimated that the values won't exceed 50
 
 # 5. Stan
 data {
@@ -272,7 +282,7 @@ generated  quantities {
 
 # 6. Model running
 The non-hierarchical and hierarchical stan models from chapter 5 are compiled and sampled in this section. We will explain the used parameters as the section proceed.
-```{r message=FALSE}
+```{r eval=FALSE, message=FALSE}
 
 df_data <- data.frame(years=seq(1950,2018), data_co2_population)
 df_plot <- melt(data = df_data, id.vars = "years", variable.name = "country")
@@ -326,7 +336,7 @@ monitor(hier_fit)
 The 
 
 
-```{r}
+```{r eval=FALSE}
 pooled_plotters <- function() {
   pooled_df =data.frame(rstan::extract(pool_fit, permuted=T))
   
@@ -340,7 +350,7 @@ pooled_plotters <- function() {
 }
 ```
 
-```{r}
+```{r eval=FALSE}
 hierarchical_plotters <- function() {
   hierarchical_df =data.frame(rstan::extract(hier_fit, permuted=T))
   
