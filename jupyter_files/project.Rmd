@@ -270,6 +270,8 @@ generated  quantities {
 }
 
 
+# 6. Model running
+The non-hierarchical and hierarchical stan models from chapter 5 are compiled and sampled in this section. We will explain the used parameters as the section proceed.
 ```{r message=FALSE}
 
 df_data <- data.frame(years=seq(1950,2018), data_co2_population)
@@ -277,8 +279,9 @@ df_plot <- melt(data = df_data, id.vars = "years", variable.name = "country")
 vectored_data_pop <- data.frame(df_plot[,'value'])
 N <- nrow(vectored_data_pop)
 
-num_of_iter <- 2000
-num_of_warmup <- 1000
+
+num_of_iter <- 1000
+num_of_warmup <- 200
 
 pool_data <- list(N = N,
                   y = vectored_data_pop[,1])
@@ -288,7 +291,13 @@ pool_model <- rstan::stan_model(file = "pooled_model_stan_without_loglik.stan")
 pool_fit <- rstan::sampling(object = pool_model,
                             data = pool_data,
                             iter = num_of_iter,
-                            warmup = num_of_warmup)
+                            warmup = num_of_warmup,
+                            refresh = 0)
+```
+
+We need the total number of observations to be able to run the pooled model, and it's saved to variable N. Vectored version of data is also required by the pooled model. We chose 1000 as the number of iterations per chain, as it has also worked relatively reliably in previous work on the course. We used one fifth of the iterations in the warm-up sample to ensure that the chains were close to the maximum probability mass when true iterations start. At this point, the model without logarithmic likelihood is used to make code compiling faster. Lots of more information about function *stan::stan_model* and *stan::sampling* is found from RStan documentation. 
+
+```{r message=FALSE}
 
 hier_data <- list(N = nrow(data_co2_population),
                   N_c = ncol(data_co2_population),
@@ -301,17 +310,20 @@ hier_fit <- rstan::sampling(object = hier_model,
                             data = hier_data,
                             iter = num_of_iter,
                             warmup = num_of_warmup,
-                            refresh = 0,
-                            seed=12345)
-hier_fit
-monitor(pool_fit)
-monitor(hier_fit)
-
-check_hmc_diagnostics(hier_fit)
+                            refresh = 0)
 
 ```
 
+When running the hierarchical model, the CO$_2$ data is given in matrix form. The number of iterations and the number of warm-ups is the same as in the pooled model presented above. One group is the one country in this model, so the number of groups is the same as the number of columns in data.
 
+# 7. Convergence diagnostics
+
+We can inspect the convergence of variables using, for example, quantity $\hat{R}$ and quantity \emph{effective sample size} (ESS). Lets start from the pooled model:
+```{r}
+monitor(pool_fit)
+monitor(hier_fit)
+```
+The 
 
 
 ```{r}
