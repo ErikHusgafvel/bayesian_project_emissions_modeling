@@ -202,7 +202,7 @@ Results shown in the Figure \ref{fig:co2-emissions-per-capita} represent selecte
 
 ## 4.1 Choosing hyper prior mu
 
-With the information that we obtained from investigating the internet more thoroughly, we were able to estimate the order of magnitude for the CO2-emissions per capita. Considering our range of flunctuation, we can first exclude the results below zero. There won't be negative values in CO2-emissions calculations. On the other end, we estimated that the values won't exceed 50 kilo tonns per year per country. However, given the information that we were able to obtain, we believe that there is a lot of space for error in value range [0,50]. Thus, we believe that the actual expected mean for hyper prior $\mu_0$ is closer to 0 than 50. We estimated that most of the values should be somewhere between 0 and 30. Therefore, the expected value for $\mu_0$ was placed to 15: $E(\mu_0) = 15$. With the observations presented above, we were finally able to estimate the distribution for $\mu_0$: $\mu_0 \sim logN(2.58, 0.5)$ seems to be reasonable. With this distribution and values, $\mu_0$ is strictly restricted to the positive values, has it's expected value $E(\mu_0) \approx 15.0$ and the $P(\mu_0 < 50) \approx 1.00$.
+With the information that we obtained from investigating the internet more thoroughly, we were able to estimate the order of magnitude for the CO2-emissions per capita. Considering our range of fluctuation, we can first exclude the results below zero. There won't be negative values in CO2-emissions calculations. On the other end, we estimated that the values won't exceed 50 kilo tonns per year per country. However, given the information that we were able to obtain, we believe that there is a lot of space for error in value range [0,50]. Thus, we believe that the actual expected mean for hyper prior $\mu_0$ is closer to 0 than 50. We estimated that most of the values should be somewhere between 0 and 30. Therefore, the expected value for $\mu_0$ was placed to 15: $E(\mu_0) = 15$. With the observations presented above, we were finally able to estimate the distribution for $\mu_0$: $\mu_0 \sim logN(2.58, 0.5)$ seems to be reasonable. With this distribution and values, $\mu_0$ is strictly restricted to the positive values, has it's expected value $E(\mu_0) \approx 15.0$ and the $P(\mu_0 < 50) \approx 1.00$.
 
 ## 4.2 Choosing hyper prior sigma
 
@@ -214,6 +214,12 @@ Choosing the common sigma for given data points (observations), one can try to a
 
 
 # 5. Stan
+
+## 5.1 Pooled model
+
+Example code for pooled model
+
+```{stan output.var='not_important', , eval = FALSE, tidy = FALSE}
 data {
   int <lower=0> N; // number of observations
   vector[N] y; // observations
@@ -245,10 +251,15 @@ generated quantities {
       log_lik[i] = normal_lpdf(y[i] | mu, sigma);
     }
 }
+```
+
+
 
 ## 5.2 Hierarchical model
 
 Example code for hierarchical model
+
+```{stan output.var='not_important2', , eval = FALSE, tidy = FALSE}
 
 data {
     int<lower=0> N;            // Number of observations
@@ -290,11 +301,13 @@ generated  quantities {
         }
     }
 }
-
+```
 
 # 6. Model running
-The non-hierarchical and hierarchical stan models from chapter 5 are compiled and sampled in this section. We will explain the used parameters as the section proceed.
-```{r message=FALSE}
+
+The non-hierarchical and hierarchical stan models from chapter 5 are compiled and sampled in this section. We will explain the used parameters as the section proceeds.
+
+```{r message=FALSE, cache=TRUE}
 
 df_data <- data.frame(years=seq(1950,2018), data_co2_population)
 df_plot <- melt(data = df_data, id.vars = "years", variable.name = "country")
@@ -319,7 +332,7 @@ pool_fit <- rstan::sampling(object = pool_model,
 
 We need the total number of observations to be able to run the pooled model, and it's saved to variable N. Vectored version of data is also required by the pooled model. We chose 1000 as the number of iterations per chain, as it has also worked relatively reliably in previous work on the course. We used one fifth of the iterations in the warm-up sample to ensure that the chains were close to the maximum probability mass when true iterations start. At this point, the model without logarithmic likelihood is used to make code compiling faster. Lots of more information about function *stan::stan_model* and *stan::sampling* is found from RStan documentation. 
 
-```{r message=FALSE}
+```{r message=FALSE, cache=TRUE}
 
 hier_data <- list(N = nrow(data_co2_population),
                   N_c = ncol(data_co2_population),
@@ -342,13 +355,15 @@ When running the hierarchical model, the CO$_2$ data is given in matrix form. Th
 
 We can inspect the convergence of chains using, for example, *potential scale reducing factor* $\hat{R}$ and \emph{effective sample size} (ESS). The first of these, $\hat{R}$, examines stationarity and mixing of chains. Correspondingly, the effective sample size takes into account the autocorrelation between the samples in a chain. More information about mathematics of these diagnostics can be found in [https://arxiv.org/pdf/1903.08008.pdf]. Let's start by monitoring the results with \emph{monitor} function, which also reveals the convergence quantities of chains.
 
-```{r}
+```{r cache=TRUE}
 monitor(pool_fit)
 monitor(hier_fit)
 ```
 First of all, we can see that $\hat{R}$s for both models are 1 or 1.01, which indicates that the chains are fully converged with a high probability. We can deduce the same fact by inspecting the Tail_ESS, which are over 2000 for all the variables under consideration. So by looking at these convergence diagnostics, we couldn't spot any convergence problems of Monte-Carlo chains.
 
-The convergence of the model simulations was sufficient already on the first try as we used the 2000 iteration with 1000 warm-up samples. With the try-and-error method, we were able to deduce that there was no need for over 1000 iterations, which significantly reduced simulations' execution time. The number of warm-up samples (200) is also experimental. We noticed that even 50 warm-up samples could be sufficient to produce good enough convergence after the warm-up period, but then there could also be an opportunity for the worse convergence. However, the use of half of the samples as warm-ups seemed to be too large in this application.
+The convergence of the model simulations was sufficient already on the first try as we used the 2000 iteration with 1000 warm-up samples. With the try-and-error method, we were able to deduce that there was no need for over 1000 iterations, which significantly reduced simulations' execution time. The final number of iterations for each chain was obtained through testing and monitoring. Lowering down the total number of iterations, to for example 500, increased the R-Hat value for some $\mu$s. After testing and monitoring the effect of changing the number of iterations within each chain, it was decided that the sufficient number of iterations is 1000.
+
+Using the same logic, we obtained the number of warm-up samples (200) through trial and error. We noticed that even 50 warm-up samples were sufficient - in some cases - to produce good enough convergence after the warm-up period. However, there were some fluctuations in the reliability of the testing phase, i.e., there were some individual test cases where the convergence was insufficient. However, we noticed through our testing phase that the use of half of the samples as warm-ups seemed to be too much. This means that the algorithm could find a higher probability density area with less iterations. Therefore, the iterations after 200 warm-ups were already converging towards the final probability distribution.
 
 # 8. Posterior predictive checks
 

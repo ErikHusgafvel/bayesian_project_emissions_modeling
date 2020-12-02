@@ -1,0 +1,10 @@
+base
+StanHeaders
+ggplot2
+rstan
+loo
+reshape2
+gridExtra
+tidyr
+bayesplot
+dplyr
