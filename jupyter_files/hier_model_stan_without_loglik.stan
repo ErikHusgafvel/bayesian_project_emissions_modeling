@@ -13,8 +13,8 @@ parameters {
 }
 
 model {
-    hyper_mu ~ lognormal(1.9, 0.7);     // weakly informative hyper-prior
-    hyper_sigma ~ inv_chi_square(4.5);   // weakly informative hyper-prior
+    hyper_mu ~ lognormal(2.58, 0.5);     // weakly informative hyper-prior
+    hyper_sigma ~ gamma(2.5,0.8);   // weakly informative hyper-prior
     
     mu ~ normal(hyper_mu, hyper_sigma); // population prior with unknown parameters   
     sigma ~ inv_chi_square(2.5); // weakly informative prior for group (common) std
@@ -26,8 +26,13 @@ model {
 }
 
 generated  quantities {
-    real y_pred;
-    y_pred = normal_rng(hyper_mu, sigma);
+    real y_pred_new_county;
+    real y_pred_SAU;
+    real y_pred_FIN;
+    
+    y_pred_new_county = normal_rng(hyper_mu, hyper_sigma);
+    y_pred_SAU = normal_rng(mu[12], sigma);
+    y_pred_FIN = normal_rng(mu[6], sigma);
     
 }
 

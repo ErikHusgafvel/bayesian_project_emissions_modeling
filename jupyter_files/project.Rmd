@@ -50,6 +50,7 @@ emissions and thus the situation has tied.
 
 ```{r echo=FALSE, message=FALSE}
 library(rstan)
+library(loo)
 library(ggplot2)
 library(reshape2)
 library(gridExtra)
@@ -328,12 +329,42 @@ When running the hierarchical model, the CO$_2$ data is given in matrix form. Th
 
 # 7. Convergence diagnostics
 
-We can inspect the convergence of variables using, for example, quantity $\hat{R}$ and quantity \emph{effective sample size} (ESS). Lets start from the pooled model:
+We can inspect the convergence of chains using, for example, *potential scale reducing factor * $\hat{R}$ and \emph{effective sample size} (ESS). The first of these, $\hat{R}$, examines stationarity and mixing of chains. Correspondingly, the effective sample size takes into account the autocorrelation between the samples in a chain. More information about mathematics of these diagnostics can be found in [https://arxiv.org/pdf/1903.08008.pdf]. Let's start by monitoring the results with \emph{monitor} function, which also reveals the convergence quantities of chains.
 ```{r}
 monitor(pool_fit)
 monitor(hier_fit)
 ```
-The 
+First of all, we can see that $\hat{R}$s for both models are 1 or 1.01, which indicates that the chains are fully converged. We can deduce the same fact by inspecting the Tail_ESS, which are over 2000 for all the variables under consideration. So by looking at these convergence diagnostics, we couldn't spot any convergence problems of Monte-Carlo chains.
+
+The convergence of the model simulations was sufficient already on the first try as we used the 2000 iteration with 1000 warm-up samples. With the try-and-error method, we were able to deduce that there was no need for over 1000 iteration, which significantly reduced simulations' execution time. The number of warm-up samples (200) is also experimental. We noticed that even 50 warm-up samples could be sufficient to produce good enough convergence after the warm-up period, but then there could also be an opportunity for the worse convergence. However, the use of half of the samples as warm-ups seemed to be too large in this application.
+
+# 8. Posterior predictive checks
+
+# 9. Model comparison
+```{r}
+
+pool_model_loglik <- rstan::stan_model(file = "pooled_model_stan.stan")
+
+pool_fit_loglik <- rstan::sampling(object = pool_model_loglik,
+                            data = pool_data,
+                            iter = num_of_iter,
+                            warmup = num_of_warmup,
+                            refresh = 0)
+
+hier_model_loglik <- rstan::stan_model(file = "hierarchical_model_stan.stan")
+
+hier_fit_loglik <- rstan::sampling(object = hier_model_loglik,
+                            data = hier_data,
+                            iter = num_of_iter,
+                            warmup = num_of_warmup,
+                            refresh = 0)
+
+#log_lik_pooled <- extract_log_lik(pool_model_loglik, merge_chains = FALSE)
+#r_eff_pooled <- relative_eff(exp(log_lik_pooled), cores=4)
+#loo_pooled <- loo(log_lik_pooled, r_eff = r_eff_pooled, cores = 4)
+
+```
+
 
 
 ```{r eval=FALSE}

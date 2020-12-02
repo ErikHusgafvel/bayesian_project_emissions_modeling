@@ -9,8 +9,8 @@ parameters {
 }
 
 model {
-    mu ~ lognormal(1.9, 0.7); // prior
-    sigma ~ inv_chi_square(2.5); // prior
+    mu ~ lognormal(2.58, 0.5); // prior
+    sigma ~ gamma(2.5,0.8); // prior
 
   // pooled model likelihood, common mu and sigma for all observations
     y ~ normal(mu, sigma);

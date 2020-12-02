@@ -13,8 +13,8 @@ parameters {
 }
 
 model {
-    hyper_mu ~ lognormal(1.9, 0.7);     // weakly informative hyper-prior
-    hyper_sigma ~ inv_chi_square(4.5);   // weakly informative hyper-prior
+    hyper_mu ~ lognormal(2.58, 0.5);     // weakly informative hyper-prior
+    hyper_sigma ~ gamma(2.5,0.8);   // weakly informative hyper-prior
     
     mu ~ normal(hyper_mu, hyper_sigma); // population prior with unknown parameters   
     sigma ~ inv_chi_square(2.5); // weakly informative prior for group (common) std
