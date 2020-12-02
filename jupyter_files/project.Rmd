@@ -218,11 +218,11 @@ Choosing the common sigma for given data points (observations), one can try to a
 
 ## 5.1 Pooled model
 
-Example code for pooled model
+Code for the pooled model:
 
 ```{stan output.var='not_important', , eval = FALSE, tidy = FALSE}
 data {
-  int <lower=0> N; // number of observations
+  int <lower=0> N; // number of observation
   vector[N] y; // observations
 }
 
@@ -232,10 +232,9 @@ parameters {
 }
 
 model {
-    mu ~ lognormal(0, 10); // priors from last week
-    sigma ~ inv_chi_square(1); // priors from last week
-  
-  
+    mu ~ lognormal(2.58, 0.5); // prior
+    sigma ~ gamma(2.5,0.8); // prior
+
   // pooled model likelihood, common mu and sigma for all observations
     y ~ normal(mu, sigma);
 }
@@ -244,21 +243,21 @@ model {
 generated quantities {
     real ypred;
     vector[N] log_lik;
-  
-  //predictive distribution for any machine
+    //predictive distribution for any country
     ypred = normal_rng(mu, sigma);
-  
     for (i in 1:N){
-      log_lik[i] = normal_lpdf(y[i] | mu, sigma);
+        log_lik[i] = normal_lpdf(y[i] | mu, sigma);
     }
+  
 }
+
 ```
 
 
 
 ## 5.2 Hierarchical model
 
-Example code for hierarchical model
+Code for the hierarchical model:
 
 ```{stan output.var='not_important2', , eval = FALSE, tidy = FALSE}
 
@@ -277,11 +276,11 @@ parameters {
 }
 
 model {
-    hyper_mu ~ normal(0, 100);     // weakly informative hyper-prior
-    hyper_sigma ~ inv_chi_square(1);   // weakly informative hyper-prior
+    hyper_mu ~ lognormal(2.58, 0.5);     // weakly informative hyper-prior
+    hyper_sigma ~ gamma(2.5,0.8);   // weakly informative hyper-prior
     
     mu ~ normal(hyper_mu, hyper_sigma); // population prior with unknown parameters   
-    sigma ~ inv_chi_square(1); // weakly informative prior for group (common) std
+    sigma ~ inv_chi_square(2.5); // weakly informative prior for group (common) std
     
     for (j in 1:N_c) {
           y[ ,j] ~ normal(mu[j], sigma); // likelihood
@@ -290,17 +289,21 @@ model {
 }
 
 generated  quantities {
-    real y_pred;
+    real y_pred_new_county;
+    real y_pred_SAU;
+    real y_pred_FIN;
     vector[N_c] log_lik[N];
     
-    
-    y_pred = normal_rng(hyper_mu, sigma);
+    y_pred_new_county = normal_rng(hyper_mu, hyper_sigma);
+    y_pred_SAU = normal_rng(mu[12], sigma);
+    y_pred_FIN = normal_rng(mu[6], sigma);
     
     for (j in 1:N_c) {
         for (i in 1:N) {
             log_lik[i, j] = normal_lpdf(y[i,j] | mu[j], sigma);
         }
     }
+    
 }
 ```
 
@@ -370,6 +373,13 @@ Using the same logic, we obtained the number of warm-up samples (200) through tr
 
 
 # 9. Model comparison
+
+NÄMÄ YLEMPÄÄN KAPPALEESEEN!
+
+The predictive distribution of CO$_2$ per capita emission of the Kingdom of Saudi Arabia (SAU) is presented above. The mean of the predictive distribution is 11 with a standard deviation of 2.4, so Q95 is placed at point 15.1. If comparing this to the time-series figure in Section 2, the predicted value appears to be slightly too small. That's due to the fast increase in emissions which happened between 1950-1980. Our pooled model also counts values from that time interval, which causes too small values from the predictive distribution. Otherwise, the shape of the distribution looks as expected.
+
+The mean of Finland's (FIN) predictive distribution is 8.7, which seems to be in the right place if you compare it to the development of previous years (Section 2 picture).  There is also some amount of uncertainty in distribution, so Q5 is at point 4.8 and Q95 at point 12.7. That's a moderately conservative distribution, and it's not possible to do accurate estimates based on this distribution. It still can give an estimate from which broad conclusions can be drawn about the level of emissions. For example, if we compare SAU's and FIN's predictive distribution, the higher level can be deduced, although accurate estimates could not be made.
+
 Next, we will present the model comparison between our two models. The comparison is done with the PSIS-LOO stan package. When doing the relative EFF calculation from logarithmic likelihood values, the total number of 4 cores is utilized.
 ```{r message=FALSE, cache=TRUE}
 
@@ -412,7 +422,12 @@ main="PSIS reliability diagnostics for hierarchical model")
 
 
 ```
-When inspecting the comparison plots, the first clear observation is that all Pareto k diagnostic values are between $\infty$ and 0.5, so the PSIS-LOO -values of both models can be considered reliable. The values over 0.5 start to be problematic, which could lead to the model re-evaluation, but in our case, the values are all low enough. 
+When inspecting the comparison plots, the first clear observation is that all Pareto k diagnostic values are between $\infty$ and 0.5, so the PSIS-LOO -values of both models can be considered reliable. The values over 0.5 start to be problematic, which could lead to the need to re-evaluate the model, but in our case, the values are all low enough. Next, it is important to check how large p_loo is compared to the number of parameters of the model. In general, if p_loo is less than or approximately equal to the number of model parameters, the model can be considered well specified. The number of parameters of the pooled model is 2 when its p_loo is 2.5. Thus, the percentage of parameters is exceeded by 25%. Respectively, the number of parameters of the hierarchical model is 22, when its p_loo value is 22.4. Thus, the percentage of parameters is exceeded by 0.9%. The p_loo value shows that the hierarchical model's performance seems more reasonable when considered the problem in-hand. 
+
+The last PSIS-LOO's comparison variable, which we are going to inspect, is an elpd_loo. The less negative the value of elpd_loo is, the better the fit of the model to that problem can be considered to be. The values of elpd_loo are presented above. Now, it's easy starting to be easy to deduce that the hierarchical model is a better fit for this problem. Its elpd_loo value is over 900  higher than the corresponding value of the pooled model. 
+
+
+# 11. Sensitivity analysis (Priors)
 
 
 ```{r eval=FALSE}
