@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.20 (TeX Live 2019/Debian) (preloaded format=pdflatex 2020.7.4)  1 DEC 2020 07:28
+This is pdfTeX, Version 3.14159265-2.6-1.40.20 (TeX Live 2019/Debian) (preloaded format=pdflatex 2020.7.4)  2 DEC 2020 09:28
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -505,69 +505,61 @@ LaTeX Font Info:    External font `lmex10' loaded for size
 \openout4 = `project.toc'.
 
 [2]
-<GlobalTemp.png, id=42, 592.2125pt x 301.125pt>
+<GlobalTemp.png, id=52, 592.2125pt x 301.125pt>
 File: GlobalTemp.png Graphic file (type png)
 <use GlobalTemp.png>
 Package pdftex.def Info: GlobalTemp.png  used on input line 135.
 (pdftex.def)             Requested size: 469.7675pt x 238.86482pt.
 [3 <./GlobalTemp.png>]
-<project_files/figure-latex/fig1-1.pdf, id=56, 722.7pt x 867.24pt>
+<project_files/figure-latex/fig1-1.pdf, id=66, 722.7pt x 867.24pt>
 File: project_files/figure-latex/fig1-1.pdf Graphic file (type pdf)
 <use project_files/figure-latex/fig1-1.pdf>
 Package pdftex.def Info: project_files/figure-latex/fig1-1.pdf  used on input l
 ine 222.
 (pdftex.def)             Requested size: 469.76045pt x 563.71257pt.
 [4] [5 <./project_files/figure-latex/fig1-1.pdf>]
-<hier_model.png, id=76, 312.16624pt x 184.69pt>
+<hier_model.png, id=86, 312.16624pt x 184.69pt>
 File: hier_model.png Graphic file (type png)
 <use hier_model.png>
 Package pdftex.def Info: hier_model.png  used on input line 271.
 (pdftex.def)             Requested size: 312.16548pt x 184.68953pt.
 [6 <./hier_model.png>]
-<co2-emissions-per-capita.png, id=97, 432.32947pt x 400.06607pt>
+<co2-emissions-per-capita.png, id=107, 432.32947pt x 400.06607pt>
 File: co2-emissions-per-capita.png Graphic file (type png)
 <use co2-emissions-per-capita.png>
 Package pdftex.def Info: co2-emissions-per-capita.png  used on input line 304.
 (pdftex.def)             Requested size: 432.32841pt x 400.06508pt.
 [7 <./co2-emissions-per-capita.png>]
 LaTeX Font Info:    Trying to load font information for T1+lmtt on input line 3
-26.
+95.
 (/usr/share/texmf/tex/latex/lm/t1lmtt.fd
 File: t1lmtt.fd 2009/10/30 v1.6 Font defs for Latin Modern
-)
+) [8]
 LaTeX Font Info:    Font shape `T1/lmtt/bx/n' in size <10> not available
-(Font)              Font shape `T1/lmtt/b/n' tried instead on input line 381.
+(Font)              Font shape `T1/lmtt/b/n' tried instead on input line 457.
 LaTeX Font Info:    Trying to load font information for TS1+lmtt on input line 
-383.
+459.
 (/usr/share/texmf/tex/latex/lm/ts1lmtt.fd
 File: ts1lmtt.fd 2009/10/30 v1.6 Font defs for Latin Modern
-)
-Overfull \vbox (0.40161pt too high) detected at line 418
- []
-
-[8]
-Underfull \vbox (badness 10000) detected at line 471
- []
-
-[9]
-Package atveryend Info: Empty hook `BeforeClearDocument' on input line 476.
-[10]
-Package atveryend Info: Empty hook `AfterLastShipout' on input line 476.
+) [9] [10]
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 585.
+[11]
+Package atveryend Info: Empty hook `AfterLastShipout' on input line 585.
 (./project.aux)
-Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 476.
-Package atveryend Info: Empty hook `AtEndAfterFileList' on input line 476.
+Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 585.
+Package atveryend Info: Empty hook `AtEndAfterFileList' on input line 585.
 
 LaTeX Warning: There were multiply-defined labels.
 
  ) 
 Here is how much of TeX's memory you used:
- 13543 strings out of 483183
- 197570 string characters out of 5966293
- 483397 words of memory out of 5000000
- 28212 multiletter control sequences out of 15000+600000
- 586296 words of font info for 103 fonts, out of 8000000 for 9000
+ 13582 strings out of 483183
+ 198110 string characters out of 5966293
+ 482659 words of memory out of 5000000
+ 28222 multiletter control sequences out of 15000+600000
+ 587043 words of font info for 112 fonts, out of 8000000 for 9000
  14 hyphenation exceptions out of 8191
- 41i,8n,42p,806b,388s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 41i,8n,42p,806b,464s stack positions out of 5000i,500n,10000p,200000b,80000s
 {/usr/share/texmf/fonts/enc/dvips/lm/lm-ec.enc}{/usr/share/texmf/fonts/enc/dv
 ips/lm/lm-ts1.enc}{/usr/share/texmf/fonts/enc/dvips/lm/lm-mathit.enc}{/usr/shar
 e/texmf/fonts/enc/dvips/lm/lm-rm.enc}{/usr/share/texmf/fonts/enc/dvips/lm/lm-ma
@@ -581,10 +573,10 @@ texmf/fonts/type1/public/lm/lmsy10.pfb></usr/share/texmf/fonts/type1/public/lm/
 lmsy7.pfb></usr/share/texmf/fonts/type1/public/lm/lmtk10.pfb></usr/share/texmf/
 fonts/type1/public/lm/lmtt10.pfb></usr/share/texmf/fonts/type1/public/lm/lmtti1
 0.pfb>
-Output written on project.pdf (10 pages, 497989 bytes).
+Output written on project.pdf (11 pages, 512680 bytes).
 PDF statistics:
- 224 PDF objects out of 1000 (max. 8388607)
- 189 compressed objects within 2 object streams
- 45 named destinations out of 1000 (max. 500000)
- 12397 words of extra memory for PDF output out of 14400 (max. 10000000)
+ 261 PDF objects out of 1000 (max. 8388607)
+ 224 compressed objects within 3 object streams
+ 56 named destinations out of 1000 (max. 500000)
+ 12437 words of extra memory for PDF output out of 14400 (max. 10000000)
 

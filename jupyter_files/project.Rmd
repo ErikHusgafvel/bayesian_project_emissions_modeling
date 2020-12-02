@@ -197,9 +197,20 @@ Our first goal was to define the hyper prior $\mu_0$. To aid this problem, we se
 knitr::include_graphics("co2-emissions-per-capita.png")
 ```
 
-Results shown in the figure represent selected countries on year 2016 and are pretty well aligned with the CO2-emissions per capita that we calculated and drew at our data description section. However, it seems that the underlying dataset is not the same that we decided to use in this project. The idea of searching external information from the internet is to obtain a better idea about the underlying truth without having to use our own dataset at this point. We want to emphasize that at this point we used our dataset only to estimate whether our own dataset is aligned with the other information found from the internet or not aligned at all.
+Results shown in the figure represent selected countries on year 2016 and are pretty well aligned with the CO2-emissions per capita that we calculated and drew at our data description section. However, it seems that the underlying dataset is not the same that we decided to use in this project. The idea of searching external information from the internet is to obtain a better understanding about the underlying truth without having to use our own dataset at this point. We want to emphasize that at this point we used our dataset only to estimate whether our own dataset is aligned with the other information found from the internet or not aligned at all.
 
-With the information that we obtained from investigating the internet more thoroughly, we were able to estimate the order of magnitude for the CO2-emissions pre capita. Considering our range of flunctuation, we can first exclude the results below zero. There won't be negative values in CO2-emissions calculations. On the other end, we estimated that the values won't exceed 50
+## 4.1 Choosing hyper prior mu
+
+With the information that we obtained from investigating the internet more thoroughly, we were able to estimate the order of magnitude for the CO2-emissions per capita. Considering our range of flunctuation, we can first exclude the results below zero. There won't be negative values in CO2-emissions calculations. On the other end, we estimated that the values won't exceed 50 kilo tonns per year per country. However, given the information that we were able to obtain, we believe that there is a lot of space for error in value range [0,50]. Thus, we believe that the actual expected mean for hyper prior $\mu_0$ is closer to 0 than 50. We estimated that most of the values should be somewhere between 0 and 30. Therefore, the expected value for $\mu_0$ was placed to 15: $E(\mu_0) = 15$. With the observations presented above, we were finally able to estimate the distribution for $\mu_0$: $\mu_0 \sim logN(2.58, 0.5)$ seems to be reasonable. With this distribution and values, $\mu_0$ is strictly restricted to the positive values, has it's expected value $E(\mu_0) \approx 15.0$ and the $P(\mu_0 < 50) \approx 1.00$.
+
+## 4.2 Choosing hyper prior sigma
+
+Next, we had to consider the distribution for the hyper prior $\sigma_0$. Again, restricting the values to positive side only seems reasonable. In our consideration, we prioritized that the probability for $\sigma_0$ being zero would be low but on the contrary, the values close to zero would have high probability. Estimating the appropriate tail for the distribution was rather difficult with the information that we were able to obtain. Therefore, we used iterative method to find suitable hyper prior $\sigma_0$. We ended up to a Gamma distribution $Gamma(\alpha = 2.5,\beta = 0.8)$. This distribution gives $E(\sigma_0) = 1$ and $P(\sigma_0 < 6) \approx 0.99$. This seems reasonable, as we do not want to narrow the $\mu_j$ distributions too much with our prior choices.
+
+## 4.3 Choosing common sigma for observations
+
+Choosing the common sigma for given data points (observations), one can try to answer to a question, how big a jump could the data make between observations n and n+1. Given our relatively small value range [0,50] and a fact that the data observations derive from countries' CO2-emissions per capita, we consider the jumps to be only some unit digits at most. For example, with standard deviation of 2, the probability that the "random" jump from n to n+1 being greater than 2 is roughly 0.3, which is relatively big probability for such a big jump given circumstances. We believe that the changes within country CO2-emissions per capita tend to be smaller. Therefore, inverse-chi-square distribution with degree of freedom 2.5 seems reasonable. With $\sigma \sim inv-chi(2.5)$, all values are positive, expected value is roughly 0.5 and $P(\sigma) < 2 \approx 0.86$. However, this distribution leaves the possibility for the sigma being even higher than 2, which option we want to leave open.
+
 
 # 5. Stan
 data {
@@ -307,7 +318,7 @@ pool_fit <- rstan::sampling(object = pool_model,
 
 We need the total number of observations to be able to run the pooled model, and it's saved to variable N. Vectored version of data is also required by the pooled model. We chose 1000 as the number of iterations per chain, as it has also worked relatively reliably in previous work on the course. We used one fifth of the iterations in the warm-up sample to ensure that the chains were close to the maximum probability mass when true iterations start. At this point, the model without logarithmic likelihood is used to make code compiling faster. Lots of more information about function *stan::stan_model* and *stan::sampling* is found from RStan documentation. 
 
-```{r message=FALSE}
+```{r eval=FALSE, message=FALSE}
 
 hier_data <- list(N = nrow(data_co2_population),
                   N_c = ncol(data_co2_population),
@@ -329,7 +340,7 @@ When running the hierarchical model, the CO$_2$ data is given in matrix form. Th
 # 7. Convergence diagnostics
 
 We can inspect the convergence of variables using, for example, quantity $\hat{R}$ and quantity \emph{effective sample size} (ESS). Lets start from the pooled model:
-```{r}
+```{r eval=FALSE}
 monitor(pool_fit)
 monitor(hier_fit)
 ```
