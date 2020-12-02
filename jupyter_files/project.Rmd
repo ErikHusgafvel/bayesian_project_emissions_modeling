@@ -194,11 +194,11 @@ For our modeling, we needed to define hyper priors $\mu_0$ and $\sigma_0$. In ad
 
 Our first goal was to define the hyper prior $\mu_0$. To aid this problem, we searched information in the internet about country-wise CO2-emissions per capita. The figure below illustrates the results that we found. The figure is taken from https://www.economicshelp.org/blog/10296/economics/top-co2-polluters-highest-per-capita/ on the 1st of December, 2020.
 
-```{r co2-emissions-per-capita, echo=FALSE, fig.cap="\\label{fig:co2-emissions-per-capita}Selected countries CO2 emissions per capita \\newline Source: https://www.economicshelp.org/blog/10296/economics/top-co2-polluters-highest-per-capita/ \\newline Accessed December 1, 2020.", out.width = '100%'}
+```{r co2-emissions-per-capit, echo=FALSE, fig.cap="\\label{fig:co2-emissions-per-capita}Selected countries CO2 emissions per capita \\newline Source: https://www.economicshelp.org/blog/10296/economics/top-co2-polluters-highest-per-capita/ \\newline Accessed December 1, 2020.", out.width = '100%'}
 knitr::include_graphics("co2-emissions-per-capita.png")
 ```
 
-Results shown in the figure represent selected countries on year 2016 and are pretty well aligned with the CO2-emissions per capita that we calculated and drew at our data description section. However, it seems that the underlying dataset is not the same that we decided to use in this project. The idea of searching external information from the internet is to obtain a better understanding about the underlying truth without having to use our own dataset at this point. We want to emphasize that at this point we used our dataset only to estimate whether our own dataset is aligned with the other information found from the internet or not aligned at all.
+Results shown in the Figure \ref{fig:co2-emissions-per-capita} represent selected countries on year 2016 and are pretty well aligned with the CO2-emissions per capita that we calculated and drew at our data description section. However, it seems that the underlying dataset is not the same that we decided to use in this project. The idea of searching external information from the internet is to obtain a better understanding about the underlying truth without having to use our own dataset at this point. We want to emphasize that at this point we used our dataset only to estimate whether our own dataset is aligned with the other information found from the internet or not aligned at all.
 
 ## 4.1 Choosing hyper prior mu
 
@@ -294,7 +294,7 @@ generated  quantities {
 
 # 6. Model running
 The non-hierarchical and hierarchical stan models from chapter 5 are compiled and sampled in this section. We will explain the used parameters as the section proceed.
-```{r eval=FALSE, message=FALSE}
+```{r message=FALSE}
 
 df_data <- data.frame(years=seq(1950,2018), data_co2_population)
 df_plot <- melt(data = df_data, id.vars = "years", variable.name = "country")
@@ -308,7 +308,7 @@ num_of_warmup <- 200
 pool_data <- list(N = N,
                   y = vectored_data_pop[,1])
 
-pool_model <- rstan::stan_model(file = "pooled_model_stan_without_loglik.stan")
+pool_model <- rstan::stan_model(file = "pooled_model_stan_without_loglik.stan");
 
 pool_fit <- rstan::sampling(object = pool_model,
                             data = pool_data,
@@ -319,14 +319,14 @@ pool_fit <- rstan::sampling(object = pool_model,
 
 We need the total number of observations to be able to run the pooled model, and it's saved to variable N. Vectored version of data is also required by the pooled model. We chose 1000 as the number of iterations per chain, as it has also worked relatively reliably in previous work on the course. We used one fifth of the iterations in the warm-up sample to ensure that the chains were close to the maximum probability mass when true iterations start. At this point, the model without logarithmic likelihood is used to make code compiling faster. Lots of more information about function *stan::stan_model* and *stan::sampling* is found from RStan documentation. 
 
-```{r eval=FALSE, message=FALSE}
+```{r message=FALSE}
 
 hier_data <- list(N = nrow(data_co2_population),
                   N_c = ncol(data_co2_population),
                   y = data_co2_population)
 
 
-hier_model <- rstan::stan_model(file = "hier_model_stan_without_loglik.stan")
+hier_model <- rstan::stan_model(file = "hier_model_stan_without_loglik.stan");
 
 hier_fit <- rstan::sampling(object = hier_model,
                             data = hier_data,
@@ -340,16 +340,15 @@ When running the hierarchical model, the CO$_2$ data is given in matrix form. Th
 
 # 7. Convergence diagnostics
 
-<<<<<<< HEAD
-We can inspect the convergence of chains using, for example, *potential scale reducing factor * $\hat{R}$ and \emph{effective sample size} (ESS). The first of these, $\hat{R}$, examines stationarity and mixing of chains. Correspondingly, the effective sample size takes into account the autocorrelation between the samples in a chain. More information about mathematics of these diagnostics can be found in [https://arxiv.org/pdf/1903.08008.pdf]. Let's start by monitoring the results with \emph{monitor} function, which also reveals the convergence quantities of chains.
+We can inspect the convergence of chains using, for example, *potential scale reducing factor* $\hat{R}$ and \emph{effective sample size} (ESS). The first of these, $\hat{R}$, examines stationarity and mixing of chains. Correspondingly, the effective sample size takes into account the autocorrelation between the samples in a chain. More information about mathematics of these diagnostics can be found in [https://arxiv.org/pdf/1903.08008.pdf]. Let's start by monitoring the results with \emph{monitor} function, which also reveals the convergence quantities of chains.
 
-```{r eval=FALSE}
+```{r}
 monitor(pool_fit)
 monitor(hier_fit)
 ```
-First of all, we can see that $\hat{R}$s for both models are 1 or 1.01, which indicates that the chains are fully converged. We can deduce the same fact by inspecting the Tail_ESS, which are over 2000 for all the variables under consideration. So by looking at these convergence diagnostics, we couldn't spot any convergence problems of Monte-Carlo chains.
+First of all, we can see that $\hat{R}$s for both models are 1 or 1.01, which indicates that the chains are fully converged with a high probability. We can deduce the same fact by inspecting the Tail_ESS, which are over 2000 for all the variables under consideration. So by looking at these convergence diagnostics, we couldn't spot any convergence problems of Monte-Carlo chains.
 
-The convergence of the model simulations was sufficient already on the first try as we used the 2000 iteration with 1000 warm-up samples. With the try-and-error method, we were able to deduce that there was no need for over 1000 iteration, which significantly reduced simulations' execution time. The number of warm-up samples (200) is also experimental. We noticed that even 50 warm-up samples could be sufficient to produce good enough convergence after the warm-up period, but then there could also be an opportunity for the worse convergence. However, the use of half of the samples as warm-ups seemed to be too large in this application.
+The convergence of the model simulations was sufficient already on the first try as we used the 2000 iteration with 1000 warm-up samples. With the try-and-error method, we were able to deduce that there was no need for over 1000 iterations, which significantly reduced simulations' execution time. The number of warm-up samples (200) is also experimental. We noticed that even 50 warm-up samples could be sufficient to produce good enough convergence after the warm-up period, but then there could also be an opportunity for the worse convergence. However, the use of half of the samples as warm-ups seemed to be too large in this application.
 
 # 8. Posterior predictive checks
 
