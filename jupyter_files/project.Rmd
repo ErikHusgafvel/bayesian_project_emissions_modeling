@@ -57,6 +57,7 @@ library(gridExtra)
 library(tidyr)
 library(bayesplot)
 library(dplyr)
+library(rstanarm)
 ```
 
 ```{r echo=FALSE}
@@ -352,8 +353,10 @@ The convergence of the model simulations was sufficient already on the first try
 
 # 8. Posterior predictive checks
 
+
 # 9. Model comparison
-```{r}
+Next, we will present the model comparison between our two models. The comparison is done with the PSIS-LOO stan package. When doing the relative EFF calculation from logarithmic likelihood values, the total number of 4 cores is utilized.
+```{r message=FALSE, cache=TRUE}
 
 pool_model_loglik <- rstan::stan_model(file = "pooled_model_stan.stan")
 
@@ -370,13 +373,31 @@ hier_fit_loglik <- rstan::sampling(object = hier_model_loglik,
                             iter = num_of_iter,
                             warmup = num_of_warmup,
                             refresh = 0)
-
-#log_lik_pooled <- extract_log_lik(pool_model_loglik, merge_chains = FALSE)
-#r_eff_pooled <- relative_eff(exp(log_lik_pooled), cores=4)
-#loo_pooled <- loo(log_lik_pooled, r_eff = r_eff_pooled, cores = 4)
-
 ```
 
+```{r}
+
+log_lik_pooled <- extract_log_lik(pool_fit_loglik, merge_chains = FALSE)
+r_eff_pooled <- relative_eff(exp(log_lik_pooled), cores=4)
+loo_pooled <- loo(log_lik_pooled, r_eff = r_eff_pooled, cores = 4)
+print(loo_pooled)
+
+log_lik_hier <- extract_log_lik(hier_fit_loglik, merge_chains = FALSE)
+r_eff_hier <- relative_eff(exp(log_lik_hier), cores=4)
+loo_hier <- loo(log_lik_hier, r_eff = r_eff_pooled, cores = 4)
+print(loo_hier)
+
+plot(loo_pooled,
+diagnostic=c("k", "n_eff"),
+main="PSIS reliability diagnostics for pooled model")
+
+plot(loo_hier,
+diagnostic=c("k", "n_eff"),
+main="PSIS reliability diagnostics for hierarchical model")
+
+
+```
+When inspecting the comparison plots, the first clear observation is that all Pareto k diagnostic values are between $\infty$ and 0.5, so the PSIS-LOO -values of both models can be considered reliable. The values over 0.5 start to be problematic, which could lead to the model re-evaluation, but in our case, the values are all low enough. 
 
 
 ```{r eval=FALSE}
