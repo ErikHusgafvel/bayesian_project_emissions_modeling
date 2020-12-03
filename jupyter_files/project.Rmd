@@ -1,5 +1,5 @@
 ---
-title: "\vspace{3in}BDA - Project"
+title: "BDA - Project"
 author: "Tomi Räsänen - 879626 & Erik Husgafvel - 528867"
 output:
   pdf_document:
@@ -55,10 +55,10 @@ a "CO2 per capita" -estimate for each country. This is the data that we used lat
 emissions and thus the situation has tied.
 
 ```{r echo=FALSE, message=FALSE}
-#install.packages("bayestestR")
-#install.packages("remotes")
-#remotes::install_github("avehtari/BDA_course_Aalto",
-#                        subdir = "rpackage", upgrade="never")
+install.packages("bayestestR")
+install.packages("remotes")
+remotes::install_github("avehtari/BDA_course_Aalto",
+                        subdir = "rpackage", upgrade="never")
 
 library(rstan)
 library(loo)
@@ -513,35 +513,28 @@ The last PSIS-LOO's comparison variable, which we are going to inspect, is an el
 
 # 10. Sensitivity analysis (Priors)
 
-TÄMÄ YLEMPÄÄN
-
-We first examine the effect of prior distributions on the forecast outcome for the countries available from the data. The Finnish CO$_2$ emissions per person are used as an example. It can be clearly seen from the figure that the widening or narrowing of the beginning has almost no effect on the result. The means remain within the decimal, and there is no noticeable difference in the standard deviation. The behavior of all the different prediction distribution of the countries closely follows the same phenomenon. The prediction distribution of emissions of countries isn't sensitive with respect to prior choices.
-
-------
-
-
 In this part, we'll examine the effect of priors to the predictive distribution of Finland and a country outside our dataset (namely new country) with hierarchical model. We'll use three different priors and plot the end results to easily-comparable histograms to see if there is a lot of variation.
 
 ## 10.1 Choosing differing priors
 
-As a reminder, we decided to use following values to model hyper mu, hyper sigma and common sigma:<br />
-  hyper_mu $\sim$ lNorm(2.58, 0.5)<br />
-  hyper_sigma $\sim$ Gamma(2.5, 0.8)<br />
-  sigma $\sim$ inv_chi_square(2.5)<br />
+As a reminder, we decided to use following values to model hyper mu, hyper sigma and common sigma:\newline
+  hyper_mu $\sim$ lNorm(2.58, 0.5) \newline
+  hyper_sigma $\sim$ Gamma(2.5, 0.8) \newline
+  sigma $\sim$ inv_chi_square(2.5) \newline
 
 Next, under the hood, we'll do the same modeling but with different priors. The actual code is printed in the appendix. Please note that we had to change the value of warm-ups from 200 to 400 as there started to appear divergent transitions with in the tests.
 
 Our idea is to see what happens if we relax our priors a lot, and on the contrary, what happens if we make them tighter. We'll use the following values for the listed models:
 
-Relaxed model:<br />
-  hyper_mu $\sim$ lNorm(5.0, 0.5)<br />
-  hyper_sigma $\sim$ Gamma(2, 50)<br />
-  sigma $\sim$ inv_chi_square(0.1)<br />
+**Relaxed model:**\newline
+  hyper_mu $\sim$ lNorm(5.0, 0.5) \newline
+  hyper_sigma $\sim$ Gamma(2, 50)\newline
+  sigma $\sim$ inv_chi_square(0.1)\newline
 
-Tightened model:<br />
-  hyper_mu $\sim$ lNorm(0.01, 1)<br />
-  hyper_sigma $\sim$ Gamma(1.1, 0.6)<br />
-  sigma $\sim$ inv_chi_square(10)<br />
+**Tightened model:**\newline
+  hyper_mu $\sim$ lNorm(0.01, 1)\newline
+  hyper_sigma $\sim$ Gamma(1.1, 0.6)\newline
+  sigma $\sim$ inv_chi_square(10)<\newline
 
 ## 10.2 Plotting the results
 
@@ -626,6 +619,8 @@ differing_priors$NewCountry_Tightened <- mid_result_tight$y_pred_new_county
 #MCMC Areas
 mcmc_areas(differing_priors) + xlab("CO2-emissions per capita (Kilo tonns)")
 ```
+
+We first examine the effect of prior distributions on the forecast outcome for the countries available from the data. The Finnish CO$_2$ emissions per person are used as an example. It can be clearly seen from the figure that the widening or narrowing of the beginning has almost no effect on the result. The means remain within the decimal, and there is no noticeable difference in the standard deviation. The behavior of all the different prediction distribution of the countries closely follows the same phenomenon. The prediction distribution of emissions of countries isn't sensitive with respect to prior choices.
 
 # 11. Issues and potential improvements
 
