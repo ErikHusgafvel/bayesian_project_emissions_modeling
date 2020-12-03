@@ -1,4 +1,3 @@
-
 data {
   int <lower=0> N; // number of observation
   vector[N] y; // observations
@@ -27,6 +26,5 @@ generated quantities {
   for (i in 1:N){
       log_lik[i] = normal_lpdf(y[i] | mu, sigma);
   }
-  
 }
 

@@ -49,6 +49,11 @@ a "CO2 per capita" -estimate for each country. This is the data that we used lat
 emissions and thus the situation has tied.
 
 ```{r echo=FALSE, message=FALSE}
+install.packages("bayestestR")
+install.packages("remotes")
+remotes::install_github("avehtari/BDA_course_Aalto",
+                        subdir = "rpackage", upgrade="never")
+
 library(rstan)
 library(loo)
 library(ggplot2)
@@ -59,6 +64,7 @@ library(bayesplot)
 library(dplyr)
 library(rstanarm)
 library(bayestestR)
+library(aaltobda)
 ```
 
 ```{r echo=FALSE}
@@ -219,11 +225,11 @@ Choosing the common sigma for given data points (observations), one can try to a
 
 ## 5.1 Pooled model
 
-Code for the pooled model:
+Example code for pooled model
 
 ```{stan output.var='not_important', , eval = FALSE, tidy = FALSE}
 data {
-  int <lower=0> N; // number of observation
+  int <lower=0> N; // number of observations
   vector[N] y; // observations
 }
 
@@ -233,9 +239,10 @@ parameters {
 }
 
 model {
-    mu ~ lognormal(2.58, 0.5); // prior
-    sigma ~ gamma(2.5,0.8); // prior
-
+    mu ~ lognormal(0, 10); // priors from last week
+    sigma ~ inv_chi_square(1); // priors from last week
+  
+  
   // pooled model likelihood, common mu and sigma for all observations
     y ~ normal(mu, sigma);
 }
@@ -244,21 +251,21 @@ model {
 generated quantities {
     real ypred;
     vector[N] log_lik;
-    //predictive distribution for any country
-    ypred = normal_rng(mu, sigma);
-    for (i in 1:N){
-        log_lik[i] = normal_lpdf(y[i] | mu, sigma);
-    }
   
+  //predictive distribution for any machine
+    ypred = normal_rng(mu, sigma);
+  
+    for (i in 1:N){
+      log_lik[i] = normal_lpdf(y[i] | mu, sigma);
+    }
 }
-
 ```
 
 
 
 ## 5.2 Hierarchical model
 
-Code for the hierarchical model:
+Example code for hierarchical model
 
 ```{stan output.var='not_important2', , eval = FALSE, tidy = FALSE}
 
@@ -277,11 +284,11 @@ parameters {
 }
 
 model {
-    hyper_mu ~ lognormal(2.58, 0.5);     // weakly informative hyper-prior
-    hyper_sigma ~ gamma(2.5,0.8);   // weakly informative hyper-prior
+    hyper_mu ~ normal(0, 100);     // weakly informative hyper-prior
+    hyper_sigma ~ inv_chi_square(1);   // weakly informative hyper-prior
     
     mu ~ normal(hyper_mu, hyper_sigma); // population prior with unknown parameters   
-    sigma ~ inv_chi_square(2.5); // weakly informative prior for group (common) std
+    sigma ~ inv_chi_square(1); // weakly informative prior for group (common) std
     
     for (j in 1:N_c) {
           y[ ,j] ~ normal(mu[j], sigma); // likelihood
@@ -290,21 +297,17 @@ model {
 }
 
 generated  quantities {
-    real y_pred_new_county;
-    real y_pred_SAU;
-    real y_pred_FIN;
+    real y_pred;
     vector[N_c] log_lik[N];
     
-    y_pred_new_county = normal_rng(hyper_mu, hyper_sigma);
-    y_pred_SAU = normal_rng(mu[12], sigma);
-    y_pred_FIN = normal_rng(mu[6], sigma);
+    
+    y_pred = normal_rng(hyper_mu, sigma);
     
     for (j in 1:N_c) {
         for (i in 1:N) {
             log_lik[i, j] = normal_lpdf(y[i,j] | mu[j], sigma);
         }
     }
-    
 }
 ```
 
@@ -378,6 +381,77 @@ Using the same logic, we obtained the number of warm-up samples (200) through tr
 
 # 8. Posterior predictive checks
 
+```{r echo=FALSE, message=FALSE}
+pooled_plotter_posterior_pred <- function() {
+  pooled_df = data.frame(rstan::extract(pool_fit, permuted=T))
+  
+  #Histogram
+  hist(pooled_df$ypred, 
+       breaks = 100,
+       xlab = "Mean of the dataset",
+       col = "lightyellow",
+       main="Plot X. \nPooled model: Predictive distribution of the mean")
+}
+```
+
+```{r fig2, fig.height=4, fig.width=8, fig.align="center", echo=FALSE, message=FALSE}
+pooled_plotter_posterior_pred()
+
+hier_df = data.frame(rstan::extract(hier_fit, permuted=T))
+hier_hist_df <- melt(hier_df %>% select(starts_with('y_pred')))
+theme_set(
+  theme_classic() +
+    theme(legend.position = "top")
+  )
+ggplot(hier_hist_df, aes(x = value)) +
+  geom_histogram(aes(color = variable, fill = variable),
+                 alpha=0.4,
+                 bins=100,
+                 position = "identity") +
+  scale_fill_manual(values = c("#6E2C37", "#E7B800", "#0087DB"), name = "", labels = c("New Country", "Saudi-Arabia", "Finland")) +
+  scale_color_manual(values = c("#6E2C37", "#E7B800", "#0087DB"), name = "", labels = c("New Country", "Saudi-Arabia", "Finland")) +
+  geom_vline(aes(xintercept=mean(hier_df$y_pred_FIN)),
+             linetype = "dashed") +
+  geom_vline(aes(xintercept=mean(hier_df$y_pred_SAU)),
+             linetype = "dashed") +
+  geom_vline(aes(xintercept=mean(hier_df$y_pred_new_county)),
+             linetype = "dashed") +
+  ggtitle("Plot X. \nHierarchical model: Predictive distributions of means of selected countries.") +
+        xlab("CO2-emissions per capita") +
+        ylab("") +
+  theme(legend.position="top")
+```
+```{r}
+mcse_all <- bayestestR::mcse(hier_fit)
+mcse_new <- round(mcse_all$MCSE[22], 2)
+mcse_sau <- round(mcse_all$MCSE[23], 2)
+mcse_fin <- round(mcse_all$MCSE[24], 2)
+
+mean_new <- round(mean(hier_df$y_pred_new_county), 1)
+mean_sau <- round(mean(hier_df$y_pred_SAU), 1)
+mean_fin <- round(mean(hier_df$y_pred_FIN), 1)
+
+msce_quantile_new_low <- mcse_quantile(hier_df$y_pred_new_county, 0.05)$mcse
+msce_quantile_new_high <- mcse_quantile(hier_df$y_pred_new_county, 0.95)$mcse
+
+msce_quantile_sau_low <- mcse_quantile(hier_df$y_pred_SAU, 0.05)$mcse
+msce_quantile_sau_high <- mcse_quantile(hier_df$y_pred_SAU, 0.95)$mcse
+
+msce_quantile_fin_low <- mcse_quantile(hier_df$y_pred_FIN, 0.05)$mcse
+msce_quantile_fin_high <- mcse_quantile(hier_df$y_pred_FIN, 0.95)$mcse
+
+quantile_new <- round(quantile(hier_df$y_pred_new_county, c(0.05, 0.95)), 0)
+quantile_sau <- round(quantile(hier_df$y_pred_SAU, c(0.05, 0.95)), 0)
+quantile_fin <- round(quantile(hier_df$y_pred_FIN, c(0.05, 0.95)), 1)
+quantile_sau[1]
+```
+
+The predictive distribution of CO$_2$ per capita emission of the Kingdom of Saudi Arabia (SAU) is presented above. The mean of the predictive distribution is `r mean_sau` with MCSE `r mcse_sau`... A standard deviation for Saudi-Arabia is 2.4, 5% quantile `r quantile_sau[[1]]` and 95% qauntile `r quantile_sau[[2]]`. Comparing this to the time-series figure in Section 2, the predicted value appears to be slightly too small. That's due to the fast increase in emissions which happened between 1950-1980. Our hierarchical model also counts values from that time interval, which causes too small values from the predictive distribution. Otherwise, the shape of the distribution looks as expected.
+
+The mean of Finland's (FIN) predictive distribution is roughly 9, which seems to be correct comparing it to the development of previous years (Section 2 picture).  There is also some amount of uncertainty in distribution, so Q5 is at point 4.7 and Q95 at point 12.6. That's a moderately conservative distribution, and it's not possible to do accurate estimates based on this distribution. It still can give an estimate from which broad conclusions can be drawn about the level of emissions. For example, if we compare SAU's and FIN's predictive distribution, the higher level can be deduced, although accurate estimates could not be made.
+
+Next, let's analyze the prediction distribution of our hierarchical model for the new country. The first positive sign is that the mean settled down to about 5.5, which is also the most likely possibility inferred from the Section 2 figure based on the data used. The moderate large standard deviation also limits its predictive power for this forecast variable, but again gives direction, which could be the new country's emissions level. Usage of the normal gaussian hierarchical model is causing the distribution to spread to the negative consumption side, which is an possible downside. We are going to discuss potential improvements in Section 11. These same considerations also apply to the sample prediction done from the pooled model. 
+
 
 # 9. Model comparison
 
@@ -442,7 +516,10 @@ knitr::include_graphics("annual_global_emission.png")
 # 12. Conclusion
 The main result from our data analysis is that the hierarchical model seems to fit better to the problem at hand. Its advantages over the pooled model are noticeable from PSIS-LOO analytics as well as from the fact that every country can be considered separately from other countries when making decisions. Forecasts and predictions can then be made for each country individually. The absence of that from the pooled model is a clear disadvantage of it. As a whole, the suitability of the hierarchical model for modeling country-specific emissions can be seen in the work. With the amount of data used, the choice of prior distributions has almost no effect on the posterior distributions of means.
 
+# 12. What was learned
+
 The clear message of the work is that the countries' CO2 emissions are still high, and Finland is no exception. The development of China's emissions is worrying, and the high per capita values in the Middle East cannot be ignored. CO2 per capita emissions in many African countries are still small, but it is also good to think about future effects in a situation where emissions are rising sharply on that side of the globe. It is crucial to focus on exporting clean technology to countries that are still developing in order to prevent an explosive increase in emissions.
+
 # 13. Self-reflection
 
 
