@@ -359,15 +359,9 @@ hier_fit <- rstan::sampling(object = hier_model,
 
 When running the hierarchical model, the CO$_2$ data is given in matrix form. The number of iterations and the number of warm-ups is the same as in the pooled model presented above. One group is the one country in this model, so the number of groups is the same as the number of columns in data.
 
-```{r}
-
-mu <- extract_variable_matrix(hier_fit, "mu")
-```
-
-
 # 7. Convergence diagnostics
 
-We can inspect the convergence of chains using, for example, *potential scale reducing factor* $\hat{R}$ and \emph{effective sample size} (ESS). The first of these, $\hat{R}$, examines stationarity and mixing of chains. Correspondingly, the effective sample size takes into account the autocorrelation between the samples in a chain. More information about mathematics of these diagnostics can be found in [https://arxiv.org/pdf/1903.08008.pdf]. Let's start by monitoring the results with \emph{monitor} function, which also reveals the convergence quantities of chains.
+We can inspect the convergence of chains using, for example, *potential scale reducing factor* $\hat{R}$ and \emph{effective sample size} (ESS). The first of these, $\hat{R}$, examines stationarity and mixing of chains. Correspondingly, the effective sample size takes into account the autocorrelation between the samples in a chain. More information about mathematics of these diagnostics can be found in (https://arxiv.org/pdf/1903.08008.pdf. Accessed 3 December 2020). Let's start by monitoring the results with \emph{monitor} function, which also reveals the convergence quantities of chains.
 
 ```{r}
 monitor(pool_fit)
@@ -508,7 +502,7 @@ The last PSIS-LOO's comparison variable, which we are going to inspect, is an el
 
 TÄMÄ YLEMPÄÄN
 
-We first examine the effect of prior distributions on the forecast outcome for the countries available from the data. The Finnish CO_$2$ emissions per person are used as an example. It can be clearly seen from the figure that the widening or narrowing of the beginning has almost no effect on the result. The means remain within the decimal, and there is no noticeable difference in the standard deviation. The behavior of all the different prediction distribution of the countries closely follows the same phenomenon. The prediction distribution of emissions of countries isn't sensitive with respect to prior choices.
+We first examine the effect of prior distributions on the forecast outcome for the countries available from the data. The Finnish CO$_2$ emissions per person are used as an example. It can be clearly seen from the figure that the widening or narrowing of the beginning has almost no effect on the result. The means remain within the decimal, and there is no noticeable difference in the standard deviation. The behavior of all the different prediction distribution of the countries closely follows the same phenomenon. The prediction distribution of emissions of countries isn't sensitive with respect to prior choices.
 
 ------
 
