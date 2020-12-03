@@ -15,7 +15,7 @@ output:
 
 # 1. Introduction
 
-One of the biggest challenges of humankind in the 2020s is figuring out ways to slow down the growth of greenhouse gas emissions and stop global warming (due to human activities) under 2 $^{\circ}$C. The increasing trend of global temperature is easily seen in Figure \ref{fig:global_temp} [cite NASA] in which the global surface temperature is illustrated relative to 1951-1980 average temperatures. Warming can also be seen with one's own eyes by observing the winters that are warming year by year, by noticing that the number of devastating hurricanes is increased, and by finding out the increased rate of ice melting in glaciers during summer.
+One of the biggest challenges of humankind in the 2020s is figuring out ways to slow down the growth of greenhouse gas emissions and stop global warming (due to human activities) under 2 $^{\circ}$C. The increasing trend of global temperature is easily seen in Figure \ref{fig:global_temp} (https://climate.nasa.gov/vital-signs/global-temperature/. Accessed 3 December 2020)  in which the global surface temperature is illustrated relative to 1951-1980 average temperatures. Warming can also be seen with one's own eyes by observing the winters that are warming year by year, by noticing that the number of devastating hurricanes is increased, and by finding out the increased rate of ice melting in glaciers during summer.
 
 ```{r globaltemp, echo=FALSE, fig.cap="\\label{fig:global_temp}Global Land-Ocean Temperature Index", out.width = '100%'}
 knitr::include_graphics("GlobalTemp.png")
@@ -29,7 +29,7 @@ In this project, our goal is to model the historical emission trends of selected
 # 2. Data description
 
 
-Our CO$_2$ data was obtained from \textit{Our World in Data} (OWID) web page [cite OWID_net] and the actual \textit{CSV} file from OWID GitHub page [cite OWID_git]. As mentioned earlier, climate change is a hot topic in the daily news, and there is a lot of studies and research concerning how CO$_2$ emissions are influencing global warming. The data set was also used, for example, when researchers studied the climate impact of the different policy recommendation which targeted to reduce greenhouse gases from the atmosphere.
+Our CO$_2$ data was obtained from \textit{Our World in Data} (OWID) web page (https://ourworldindata.org/co2-and-other-greenhouse-gas-emissions. Accessed 3 December 2020) and the actual \textit{CSV} file from OWID GitHub page (https://github.com/owid/co2-data. Accessed 3 December 2020). As mentioned earlier, climate change is a hot topic in the daily news, and there is a lot of studies and research concerning how CO$_2$ emissions are influencing global warming. The data set was also used, for example, when researchers studied the climate impact of the different policy recommendation which targeted to reduce greenhouse gases from the atmosphere.
 
 ## 2.1 Choosing the sample and estimating it's resemblance
 
@@ -210,7 +210,7 @@ Results shown in the Figure \ref{fig:co2-emissions-per-capita} represent selecte
 
 ## 4.1 Choosing hyper prior mu
 
-With the information that we obtained from investigating the internet more thoroughly, we were able to estimate the order of magnitude for the CO2-emissions per capita. Considering our range of fluctuation, we can first exclude the results below zero. There won't be negative values in CO2-emissions calculations. On the other end, we estimated that the values won't exceed 50 kilo tonns per year per country. However, given the information that we were able to obtain, we believe that there is a lot of space for error in value range [0,50]. Thus, we believe that the actual expected mean for hyper prior $\mu_0$ is closer to 0 than 50. We estimated that most of the values should be somewhere between 0 and 30. Therefore, the expected value for $\mu_0$ was placed to 15: $E(\mu_0) = 15$. With the observations presented above, we were finally able to estimate the distribution for $\mu_0$: $\mu_0 \sim logN(2.58, 0.5)$ seems to be reasonable. With this distribution and values, $\mu_0$ is strictly restricted to the positive values, has it's expected value $E(\mu_0) \approx 15.0$ and the $P(\mu_0 < 50) \approx 1.00$.
+With the information that we obtained from investigating the internet more thoroughly, we were able to estimate the order of magnitude for the CO2-emissions per capita. Considering our range of fluctuation, we can first exclude the results below zero. There won't be negative values in CO2-emissions calculations. On the other end, we estimated that the values won't exceed 50 kilo tonns per year per country. However, given the information that we were able to obtain, we believe that there is a lot of space for error in value range [0, 50]. Thus, we believe that the actual expected mean for hyper prior $\mu_0$ is closer to 0 than 50. We estimated that most of the values should be somewhere between 0 and 30. Therefore, the expected value for $\mu_0$ was placed to 15: $E(\mu_0) = 15$. With the observations presented above, we were finally able to estimate the distribution for $\mu_0$: $\mu_0 \sim logN(2.58, 0.5)$ seems to be reasonable. With this distribution and values, $\mu_0$ is strictly restricted to the positive values, has it's expected value $E(\mu_0) \approx 15.0$ and the $P(\mu_0 < 50) \approx 1.00$.
 
 ## 4.2 Choosing hyper prior sigma
 
@@ -446,11 +446,11 @@ quantile_fin <- round(quantile(hier_df$y_pred_FIN, c(0.05, 0.95)), 1)
 quantile_sau[1]
 ```
 
-The predictive distribution of CO$_2$ per capita emission of the Kingdom of Saudi Arabia (SAU) is presented above. The mean of the predictive distribution is `r mean_sau` with MCSE `r mcse_sau`... A standard deviation for Saudi-Arabia is 2.4, 5% quantile `r quantile_sau[[1]]` and 95% qauntile `r quantile_sau[[2]]`. Comparing this to the time-series figure in Section 2, the predicted value appears to be slightly too small. That's due to the fast increase in emissions which happened between 1950-1980. Our hierarchical model also counts values from that time interval, which causes too small values from the predictive distribution. Otherwise, the shape of the distribution looks as expected.
+The predictive distribution of CO$_2$ per capita emission of the Kingdom of Saudi Arabia (SAU) is presented above. The mean of the predictive distribution is `r mean_sau` with rounded MCSE `r mcse_sau`. A standard deviation for Saudi-Arabia is 2.4, which produced moderately wide distribution if compared to posterior distributions of the means. Comparing this to the time-series figure in Section 2, the predicted value appears to be slightly too small. That's due to the fast increase in emissions which happened between 1950-1980. Our hierarchical model also counts values from that time interval, which causes too small values from the predictive distribution. Otherwise, the shape of the distribution looks as expected.
 
-The mean of Finland's (FIN) predictive distribution is roughly 9, which seems to be correct comparing it to the development of previous years (Section 2 picture).  There is also some amount of uncertainty in distribution, so Q5 is at point 4.7 and Q95 at point 12.6. That's a moderately conservative distribution, and it's not possible to do accurate estimates based on this distribution. It still can give an estimate from which broad conclusions can be drawn about the level of emissions. For example, if we compare SAU's and FIN's predictive distribution, the higher level can be deduced, although accurate estimates could not be made.
+The mean of Finland's (FIN) predictive distribution is roughly `r mean_new`, which seems to be correct comparing it to the development of previous years (Section 2 picture).  There is also a decent amount of uncertainty in distribution, which is seen from the histogram or if inspecting the quantiles of distributions. That's a moderately conservative distribution, and it's not possible to do accurate estimates based on this distribution. It still can give an estimate from which broad conclusions can be drawn about the level of emissions. For example, if we compare SAU's and FIN's predictive distribution, the higher level of SAU emissions can be deduced, although accurate estimates could not be made.
 
-Next, let's analyze the prediction distribution of our hierarchical model for the new country. The first positive sign is that the mean settled down to about 5.5, which is also the most likely possibility inferred from the Section 2 figure based on the data used. The moderate large standard deviation also limits its predictive power for this forecast variable, but again gives direction, which could be the new country's emissions level. Usage of the normal gaussian hierarchical model is causing the distribution to spread to the negative consumption side, which is an possible downside. We are going to discuss potential improvements in Section 11. These same considerations also apply to the sample prediction done from the pooled model. 
+Next, let's analyze the prediction distribution of our hierarchical model for the new country. The first positive sign is that the mean settled down to about `r mean_new`, which is also the most likely possibility inferred from the Section 2 figure based on the data used. The moderate large standard deviation also limits its predictive power for this forecast variable, but again gives direction, which could be the new country's emissions level. Usage of the normal gaussian hierarchical model is causing the distribution to spread to the negative consumption side, which is an possible downside. We are going to discuss potential improvements in Section 11. These same considerations also apply to the sample prediction done from the pooled model. 
 
 
 # 9. Model comparison
@@ -497,14 +497,21 @@ main="PSIS reliability diagnostics for hierarchical model")
 
 
 ```
-When inspecting the comparison plots, the first clear observation is that all Pareto k diagnostic values are between $\infty$ and 0.5, so the PSIS-LOO -values of both models can be considered reliable. The values over 0.5 start to be problematic, which could lead to the need to re-evaluate the model, but in our case, the values are all low enough. Next, it is important to check how large p_loo is compared to the number of parameters of the model. In general, if p_loo is less than or approximately equal to the number of model parameters, the model can be considered well specified. The number of parameters of the pooled model is 2 when its p_loo is 2.5. Thus, the percentage of parameters is exceeded by 25%. Respectively, the number of parameters of the hierarchical model is 22, when its p_loo value is 22.4. Thus, the percentage of parameters is exceeded by 0.9%. The p_loo value shows that the hierarchical model's performance seems more reasonable when considered the problem in-hand. 
+When inspecting the comparison plots, the first clear observation is that all Pareto k diagnostic values are between $\infty$ and 0.5, so the PSIS-LOO -values of both models can be considered reliable. The values over 0.5 start to be problematic, which could lead to the need to re-evaluate the model, but in our case, the values are all low enough. Next, it is important to check how large p_loo is compared to the number of parameters of the model. In general, if p_loo is less than or approximately equal to the number of model parameters, the model can be considered well specified. The number of parameters of the pooled model is 2 when its p_loo is about 2.5. Thus, the p_loo exceeds the number of parameters by approximately 25 percent. Respectively, the number of parameters of the hierarchical model is about 22, when its p_loo value is 22.4. Thus, the p_loo exceeds the number of parameters by about 0.9 %. The p_loo value shows that the hierarchical model's performance seems more reasonable when considered the problem in-hand. 
 
-The last PSIS-LOO's comparison variable, which we are going to inspect, is an elpd_loo. The less negative the value of elpd_loo is, the better the fit of the model to that problem can be considered to be. The values of elpd_loo are presented above. Now, it's easy starting to be easy to deduce that the hierarchical model is a better fit for this problem. Its elpd_loo value is over 900  higher than the corresponding value of the pooled model. 
+The last PSIS-LOO's comparison variable, which we are going to inspect, is an elpd_loo. The less negative the value of elpd_loo is, the better the fit of the model to that problem can be considered to be. The values of elpd_loo are presented above. Now, it's starting to be easy to deduce that the hierarchical model is a better fit for this problem, as its elpd_loo value is over 900 higher than the corresponding value of the pooled model. In summary, therefore, we can state that our hierarchical model is better than the pooled model. For this reason, we will consider the effect of prior distributions only on the hierarchical model.
 
 
 # 10. Sensitivity analysis (Priors)
 
 # 11. Issues and potential improvements
+
+TÄMÄ YLEMPÄÄN
+
+We first examine the effect of prior distributions on the forecast outcome for the countries available from the data. The Finnish CO_$2$ emissions per person are used as an example. It can be clearly seen from the figure that the widening or narrowing of the beginning has almost no effect on the result. The means remain within the decimal, and there is no noticeable difference in the standard deviation. The behavior of all the different prediction distribution of the countries closely follows the same phenomenon. The prediction distribution of emissions of countries isn't sensitive with respect to prior choices.
+
+------
+
 In this section, we are going to list possible issues related to, for example, the used models. From the problems, we get directly to possible development ideas that could be interesting to implement in the future. The first potential issue is related to data reliability, which always has to be taken into consideration when data from open-source is used. In the worst case, the use of manipulated data can lead to significantly detrimental conclusions, for example, when considering policy recommendations. At the beginning of the work, we looked at the source of the data from many different angles, which makes it seem unlikely that the data storers had modified it. A greater concern is the reliability of samples from different countries. For example, it may be in the interests of some parties to beautify the country's CO2 emissions, making the data unreliable. This potential issue should be kept in mind when looking at the results. 
 
 Another issue arose at the prediction stage when the probability distribution provided the possibility to get values below zero, which depending on the definition, either does not make sense or means the removal of CO$_2$ emissions from the atmosphere (carbon negativity). If we choose carbon negativity as the definition of negative values, the distribution is too broad (too high a probability for carbon negativity) but otherwise possible. If, on the other hand, we think that emissions cannot be negative (as in the choice of a priori), the tail is a real issue. The possible improvement is to use some other hierarchical model than Gaussian when modeling this phenomenon. Using a different hierarchical model could be an excellent experimental topic for further development of the work.
@@ -513,15 +520,15 @@ As mentioned above, the one possible improvement is to use a different hierarchi
 ```{r annual_global_emiss, echo=FALSE, fig.cap="\\label{fig:annual_global_emission}Annual global emissions -- ", out.width = '100%'}
 knitr::include_graphics("annual_global_emission.png")
 ```
+
 # 12. Conclusion
 The main result from our data analysis is that the hierarchical model seems to fit better to the problem at hand. Its advantages over the pooled model are noticeable from PSIS-LOO analytics as well as from the fact that every country can be considered separately from other countries when making decisions. Forecasts and predictions can then be made for each country individually. The absence of that from the pooled model is a clear disadvantage of it. As a whole, the suitability of the hierarchical model for modeling country-specific emissions can be seen in the work. With the amount of data used, the choice of prior distributions has almost no effect on the posterior distributions of means.
 
-# 12. What was learned
-
 The clear message of the work is that the countries' CO2 emissions are still high, and Finland is no exception. The development of China's emissions is worrying, and the high per capita values in the Middle East cannot be ignored. CO2 per capita emissions in many African countries are still small, but it is also good to think about future effects in a situation where emissions are rising sharply on that side of the globe. It is crucial to focus on exporting clean technology to countries that are still developing in order to prevent an explosive increase in emissions.
 
-# 13. Self-reflection
 
+# 13. Self-reflection
+In this project, we understood a choice of prior distributions better than before on the course. The structure of the hierarchical model also became more familiar and its usefulness compared to other forms of modeling presented in the course became even more evident. Our R skills in both printing graphs and using stan improved a lot during the project, and it feels that R is a good option for use in working life as well. Of course, in addition to the above, our knowledge of the structure of global emissions and the evolution of CO$_2$ per capita in different countries was refined and updated.
 
 ```{r eval=FALSE}
 pooled_plotters <- function() {
@@ -573,7 +580,4 @@ hierarchical_plotters <- function() {
 
 ```
 
-
-
-# References
 
