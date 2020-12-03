@@ -218,11 +218,11 @@ Choosing the common sigma for given data points (observations), one can try to a
 
 ## 5.1 Pooled model
 
-Code for the pooled model:
+Example code for pooled model
 
 ```{stan output.var='not_important', , eval = FALSE, tidy = FALSE}
 data {
-  int <lower=0> N; // number of observation
+  int <lower=0> N; // number of observations
   vector[N] y; // observations
 }
 
@@ -232,9 +232,10 @@ parameters {
 }
 
 model {
-    mu ~ lognormal(2.58, 0.5); // prior
-    sigma ~ gamma(2.5,0.8); // prior
-
+    mu ~ lognormal(0, 10); // priors from last week
+    sigma ~ inv_chi_square(1); // priors from last week
+  
+  
   // pooled model likelihood, common mu and sigma for all observations
     y ~ normal(mu, sigma);
 }
@@ -243,21 +244,21 @@ model {
 generated quantities {
     real ypred;
     vector[N] log_lik;
-    //predictive distribution for any country
-    ypred = normal_rng(mu, sigma);
-    for (i in 1:N){
-        log_lik[i] = normal_lpdf(y[i] | mu, sigma);
-    }
   
+  //predictive distribution for any machine
+    ypred = normal_rng(mu, sigma);
+  
+    for (i in 1:N){
+      log_lik[i] = normal_lpdf(y[i] | mu, sigma);
+    }
 }
-
 ```
 
 
 
 ## 5.2 Hierarchical model
 
-Code for the hierarchical model:
+Example code for hierarchical model
 
 ```{stan output.var='not_important2', , eval = FALSE, tidy = FALSE}
 
@@ -276,11 +277,11 @@ parameters {
 }
 
 model {
-    hyper_mu ~ lognormal(2.58, 0.5);     // weakly informative hyper-prior
-    hyper_sigma ~ gamma(2.5,0.8);   // weakly informative hyper-prior
+    hyper_mu ~ normal(0, 100);     // weakly informative hyper-prior
+    hyper_sigma ~ inv_chi_square(1);   // weakly informative hyper-prior
     
     mu ~ normal(hyper_mu, hyper_sigma); // population prior with unknown parameters   
-    sigma ~ inv_chi_square(2.5); // weakly informative prior for group (common) std
+    sigma ~ inv_chi_square(1); // weakly informative prior for group (common) std
     
     for (j in 1:N_c) {
           y[ ,j] ~ normal(mu[j], sigma); // likelihood
@@ -289,21 +290,17 @@ model {
 }
 
 generated  quantities {
-    real y_pred_new_county;
-    real y_pred_SAU;
-    real y_pred_FIN;
+    real y_pred;
     vector[N_c] log_lik[N];
     
-    y_pred_new_county = normal_rng(hyper_mu, hyper_sigma);
-    y_pred_SAU = normal_rng(mu[12], sigma);
-    y_pred_FIN = normal_rng(mu[6], sigma);
+    
+    y_pred = normal_rng(hyper_mu, sigma);
     
     for (j in 1:N_c) {
         for (i in 1:N) {
             log_lik[i, j] = normal_lpdf(y[i,j] | mu[j], sigma);
         }
     }
-    
 }
 ```
 
@@ -311,7 +308,7 @@ generated  quantities {
 
 The non-hierarchical and hierarchical stan models from chapter 5 are compiled and sampled in this section. We will explain the used parameters as the section proceeds.
 
-```{r message=FALSE, cache=TRUE}
+```{r message=FALSE}
 
 df_data <- data.frame(years=seq(1950,2018), data_co2_population)
 df_plot <- melt(data = df_data, id.vars = "years", variable.name = "country")
@@ -336,7 +333,7 @@ pool_fit <- rstan::sampling(object = pool_model,
 
 We need the total number of observations to be able to run the pooled model, and it's saved to variable N. Vectored version of data is also required by the pooled model. We chose 1000 as the number of iterations per chain, as it has also worked relatively reliably in previous work on the course. We used one fifth of the iterations in the warm-up sample to ensure that the chains were close to the maximum probability mass when true iterations start. At this point, the model without logarithmic likelihood is used to make code compiling faster. Lots of more information about function *stan::stan_model* and *stan::sampling* is found from RStan documentation. 
 
-```{r message=FALSE, cache=TRUE}
+```{r message=FALSE}
 
 hier_data <- list(N = nrow(data_co2_population),
                   N_c = ncol(data_co2_population),
@@ -359,7 +356,7 @@ When running the hierarchical model, the CO$_2$ data is given in matrix form. Th
 
 We can inspect the convergence of chains using, for example, *potential scale reducing factor* $\hat{R}$ and \emph{effective sample size} (ESS). The first of these, $\hat{R}$, examines stationarity and mixing of chains. Correspondingly, the effective sample size takes into account the autocorrelation between the samples in a chain. More information about mathematics of these diagnostics can be found in [https://arxiv.org/pdf/1903.08008.pdf]. Let's start by monitoring the results with \emph{monitor} function, which also reveals the convergence quantities of chains.
 
-```{r cache=TRUE}
+```{r}
 monitor(pool_fit)
 monitor(hier_fit)
 ```
@@ -371,17 +368,51 @@ Using the same logic, we obtained the number of warm-up samples (200) through tr
 
 # 8. Posterior predictive checks
 
+```{r echo=FALSE}
+pooled_plotter_posterior_pred <- function() {
+  pooled_df = data.frame(rstan::extract(pool_fit, permuted=T))
+  
+  #Histogram
+  hist(pooled_df$ypred, 
+       breaks = 100,
+       xlab = "Mean of the dataset",
+       col = "lightyellow",
+       main="Plot X. \nPredictive distribution of the mean of the dataset")
+}
+
+pooled_plotter_posterior_pred()
+```
+
+```{r fig2, fig.height=4, fig.width=8, fig.align="center", echo=FALSE}
+hier_df = data.frame(rstan::extract(hier_fit, permuted=T))
+hier_hist_df <- melt(hier_df %>% select(starts_with('y_pred')))
+theme_set(
+  theme_classic() +
+    theme(legend.position = "top")
+  )
+ggplot(hier_hist_df, aes(x = value)) +
+  geom_histogram(aes(color = variable, fill = variable),
+                 alpha=0.4,
+                 bins=100,
+                 position = "identity") +
+  scale_fill_manual(values = c("#6E2C37", "#E7B800", "#0087DB"), name = "", labels = c("New Country", "Saudi-Arabia", "Finland")) +
+  scale_color_manual(values = c("#6E2C37", "#E7B800", "#0087DB"), name = "", labels = c("New Country", "Saudi-Arabia", "Finland")) +
+  geom_vline(aes(xintercept=mean(hier_df$y_pred_FIN)),
+             linetype = "dashed") +
+  geom_vline(aes(xintercept=mean(hier_df$y_pred_SAU)),
+             linetype = "dashed") +
+  geom_vline(aes(xintercept=mean(hier_df$y_pred_new_county)),
+             linetype = "dashed") +
+  ggtitle("Plot X. \nPosterior predictive checks for selected countries.") +
+        xlab("Means of CO2-emissions per capita") +
+        ylab("") +
+  theme(legend.position="top")
+```
+
 
 # 9. Model comparison
-
-NÄMÄ YLEMPÄÄN KAPPALEESEEN!
-
-The predictive distribution of CO$_2$ per capita emission of the Kingdom of Saudi Arabia (SAU) is presented above. The mean of the predictive distribution is 11 with a standard deviation of 2.4, so Q95 is placed at point 15.1. If comparing this to the time-series figure in Section 2, the predicted value appears to be slightly too small. That's due to the fast increase in emissions which happened between 1950-1980. Our pooled model also counts values from that time interval, which causes too small values from the predictive distribution. Otherwise, the shape of the distribution looks as expected.
-
-The mean of Finland's (FIN) predictive distribution is 8.7, which seems to be in the right place if you compare it to the development of previous years (Section 2 picture).  There is also some amount of uncertainty in distribution, so Q5 is at point 4.8 and Q95 at point 12.7. That's a moderately conservative distribution, and it's not possible to do accurate estimates based on this distribution. It still can give an estimate from which broad conclusions can be drawn about the level of emissions. For example, if we compare SAU's and FIN's predictive distribution, the higher level can be deduced, although accurate estimates could not be made.
-
 Next, we will present the model comparison between our two models. The comparison is done with the PSIS-LOO stan package. When doing the relative EFF calculation from logarithmic likelihood values, the total number of 4 cores is utilized.
-```{r message=FALSE, cache=TRUE}
+```{r message=FALSE}
 
 pool_model_loglik <- rstan::stan_model(file = "pooled_model_stan.stan")
 
@@ -422,12 +453,7 @@ main="PSIS reliability diagnostics for hierarchical model")
 
 
 ```
-When inspecting the comparison plots, the first clear observation is that all Pareto k diagnostic values are between $\infty$ and 0.5, so the PSIS-LOO -values of both models can be considered reliable. The values over 0.5 start to be problematic, which could lead to the need to re-evaluate the model, but in our case, the values are all low enough. Next, it is important to check how large p_loo is compared to the number of parameters of the model. In general, if p_loo is less than or approximately equal to the number of model parameters, the model can be considered well specified. The number of parameters of the pooled model is 2 when its p_loo is 2.5. Thus, the percentage of parameters is exceeded by 25%. Respectively, the number of parameters of the hierarchical model is 22, when its p_loo value is 22.4. Thus, the percentage of parameters is exceeded by 0.9%. The p_loo value shows that the hierarchical model's performance seems more reasonable when considered the problem in-hand. 
-
-The last PSIS-LOO's comparison variable, which we are going to inspect, is an elpd_loo. The less negative the value of elpd_loo is, the better the fit of the model to that problem can be considered to be. The values of elpd_loo are presented above. Now, it's easy starting to be easy to deduce that the hierarchical model is a better fit for this problem. Its elpd_loo value is over 900  higher than the corresponding value of the pooled model. 
-
-
-# 11. Sensitivity analysis (Priors)
+When inspecting the comparison plots, the first clear observation is that all Pareto k diagnostic values are between $\infty$ and 0.5, so the PSIS-LOO -values of both models can be considered reliable. The values over 0.5 start to be problematic, which could lead to the model re-evaluation, but in our case, the values are all low enough. 
 
 
 ```{r eval=FALSE}

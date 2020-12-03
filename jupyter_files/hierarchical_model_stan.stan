@@ -37,5 +37,4 @@ generated  quantities {
             log_lik[i, j] = normal_lpdf(y[i,j] | mu[j], sigma);
         }
     }
-    
 }
