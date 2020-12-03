@@ -49,6 +49,11 @@ a "CO2 per capita" -estimate for each country. This is the data that we used lat
 emissions and thus the situation has tied.
 
 ```{r echo=FALSE, message=FALSE}
+install.packages("bayestestR")
+install.packages("remotes")
+remotes::install_github("avehtari/BDA_course_Aalto",
+                        subdir = "rpackage", upgrade="never")
+
 library(rstan)
 library(loo)
 library(ggplot2)
@@ -58,6 +63,8 @@ library(tidyr)
 library(bayesplot)
 library(dplyr)
 library(rstanarm)
+library(bayestestR)
+library(aaltobda)
 ```
 
 ```{r echo=FALSE}
@@ -368,7 +375,7 @@ Using the same logic, we obtained the number of warm-up samples (200) through tr
 
 # 8. Posterior predictive checks
 
-```{r echo=FALSE}
+```{r echo=FALSE, message=FALSE}
 pooled_plotter_posterior_pred <- function() {
   pooled_df = data.frame(rstan::extract(pool_fit, permuted=T))
   
@@ -377,13 +384,13 @@ pooled_plotter_posterior_pred <- function() {
        breaks = 100,
        xlab = "Mean of the dataset",
        col = "lightyellow",
-       main="Plot X. \nPredictive distribution of the mean of the dataset")
+       main="Plot X. \nPooled model: Predictive distribution of the mean")
 }
-
-pooled_plotter_posterior_pred()
 ```
 
-```{r fig2, fig.height=4, fig.width=8, fig.align="center", echo=FALSE}
+```{r fig2, fig.height=4, fig.width=8, fig.align="center", echo=FALSE, message=FALSE}
+pooled_plotter_posterior_pred()
+
 hier_df = data.frame(rstan::extract(hier_fit, permuted=T))
 hier_hist_df <- melt(hier_df %>% select(starts_with('y_pred')))
 theme_set(
@@ -403,20 +410,45 @@ ggplot(hier_hist_df, aes(x = value)) +
              linetype = "dashed") +
   geom_vline(aes(xintercept=mean(hier_df$y_pred_new_county)),
              linetype = "dashed") +
-  ggtitle("Plot X. \nPosterior predictive checks for selected countries.") +
-        xlab("Means of CO2-emissions per capita") +
+  ggtitle("Plot X. \nHierarchical model: Predictive distributions of means of selected countries.") +
+        xlab("CO2-emissions per capita") +
         ylab("") +
   theme(legend.position="top")
 ```
+```{r}
+mcse_all <- bayestestR::mcse(hier_fit)
+mcse_new <- round(mcse_all$MCSE[22], 2)
+mcse_sau <- round(mcse_all$MCSE[23], 2)
+mcse_fin <- round(mcse_all$MCSE[24], 2)
 
-The predictive distribution of CO$_2$ per capita emission of the Kingdom of Saudi Arabia (SAU) is presented above. The mean of the predictive distribution is 11 with a standard deviation of 2.4, so Q95 is placed about at 15. If comparing this to the time-series figure in Section 2, the predicted value appears to be slightly too small. That's due to the fast increase in emissions which happened between 1950-1980. Our pooled model also counts values from that time interval, which causes too small values from the predictive distribution. Otherwise, the shape of the distribution looks as expected.
+mean_new <- round(mean(hier_df$y_pred_new_county), 1)
+mean_sau <- round(mean(hier_df$y_pred_SAU), 1)
+mean_fin <- round(mean(hier_df$y_pred_FIN), 1)
 
-The mean of Finland's (FIN) predictive distribution is 8.7, which seems to be in the right place if you compare it to the development of previous years (Section 2 picture).  There is also some amount of uncertainty in distribution, so Q5 is at point 4.7 and Q95 at point 12.6. That's a moderately conservative distribution, and it's not possible to do accurate estimates based on this distribution. It still can give an estimate from which broad conclusions can be drawn about the level of emissions. For example, if we compare SAU's and FIN's predictive distribution, the higher level can be deduced, although accurate estimates could not be made.
+msce_quantile_new_low <- mcse_quantile(hier_df$y_pred_new_county, 0.05)$mcse
+msce_quantile_new_high <- mcse_quantile(hier_df$y_pred_new_county, 0.95)$mcse
+
+msce_quantile_sau_low <- mcse_quantile(hier_df$y_pred_SAU, 0.05)$mcse
+msce_quantile_sau_high <- mcse_quantile(hier_df$y_pred_SAU, 0.95)$mcse
+
+msce_quantile_fin_low <- mcse_quantile(hier_df$y_pred_FIN, 0.05)$mcse
+msce_quantile_fin_high <- mcse_quantile(hier_df$y_pred_FIN, 0.95)$mcse
+
+quantile_new <- round(quantile(hier_df$y_pred_new_county, c(0.05, 0.95)), 0)
+quantile_sau <- round(quantile(hier_df$y_pred_SAU, c(0.05, 0.95)), 0)
+quantile_fin <- round(quantile(hier_df$y_pred_FIN, c(0.05, 0.95)), 1)
+quantile_sau[1]
+```
+
+The predictive distribution of CO$_2$ per capita emission of the Kingdom of Saudi Arabia (SAU) is presented above. The mean of the predictive distribution is `r mean_sau` with MCSE `r mcse_sau`... A standard deviation for Saudi-Arabia is 2.4, 5% quantile `r quantile_sau[[1]]` and 95% qauntile `r quantile_sau[[2]]`. Comparing this to the time-series figure in Section 2, the predicted value appears to be slightly too small. That's due to the fast increase in emissions which happened between 1950-1980. Our hierarchical model also counts values from that time interval, which causes too small values from the predictive distribution. Otherwise, the shape of the distribution looks as expected.
+
+The mean of Finland's (FIN) predictive distribution is roughly 9, which seems to be correct comparing it to the development of previous years (Section 2 picture).  There is also some amount of uncertainty in distribution, so Q5 is at point 4.7 and Q95 at point 12.6. That's a moderately conservative distribution, and it's not possible to do accurate estimates based on this distribution. It still can give an estimate from which broad conclusions can be drawn about the level of emissions. For example, if we compare SAU's and FIN's predictive distribution, the higher level can be deduced, although accurate estimates could not be made.
 
 Next, let's analyze the prediction distribution of our hierarchical model for the new country. The first positive sign is that the mean settled down to about 5.5, which is also the most likely possibility inferred from the Section 2 figure based on the data used. The moderate large standard deviation also limits its predictive power for this forecast variable, but again gives direction, which could be the new country's emissions level. Usage of the normal gaussian hierarchical model is causing the distribution to spread to the negative consumption side, which is an possible downside. We are going to discuss potential improvements in Section 11. These same considerations also apply to the sample prediction done from the pooled model. 
 
 
 # 9. Model comparison
+
 Next, we will present the model comparison between our two models. The comparison is done with the PSIS-LOO stan package. When doing the relative EFF calculation from logarithmic likelihood values, the total number of 4 cores is utilized.
 ```{r message=FALSE}
 
