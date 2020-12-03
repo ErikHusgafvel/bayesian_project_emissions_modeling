@@ -409,6 +409,12 @@ ggplot(hier_hist_df, aes(x = value)) +
   theme(legend.position="top")
 ```
 
+The predictive distribution of CO$_2$ per capita emission of the Kingdom of Saudi Arabia (SAU) is presented above. The mean of the predictive distribution is 11 with a standard deviation of 2.4, so Q95 is placed about at 15. If comparing this to the time-series figure in Section 2, the predicted value appears to be slightly too small. That's due to the fast increase in emissions which happened between 1950-1980. Our pooled model also counts values from that time interval, which causes too small values from the predictive distribution. Otherwise, the shape of the distribution looks as expected.
+
+The mean of Finland's (FIN) predictive distribution is 8.7, which seems to be in the right place if you compare it to the development of previous years (Section 2 picture).  There is also some amount of uncertainty in distribution, so Q5 is at point 4.7 and Q95 at point 12.6. That's a moderately conservative distribution, and it's not possible to do accurate estimates based on this distribution. It still can give an estimate from which broad conclusions can be drawn about the level of emissions. For example, if we compare SAU's and FIN's predictive distribution, the higher level can be deduced, although accurate estimates could not be made.
+
+Next, let's analyze the prediction distribution of our hierarchical model for the new country. The first positive sign is that the mean settled down to about 5.5, which is also the most likely possibility inferred from the Section 2 figure based on the data used. The moderate large standard deviation also limits its predictive power for this forecast variable, but again gives direction, which could be the new country's emissions level. Usage of the normal gaussian hierarchical model is causing the distribution to spread to the negative consumption side, which is an possible downside. We are going to discuss potential improvements in Section 11. These same considerations also apply to the sample prediction done from the pooled model. 
+
 
 # 9. Model comparison
 Next, we will present the model comparison between our two models. The comparison is done with the PSIS-LOO stan package. When doing the relative EFF calculation from logarithmic likelihood values, the total number of 4 cores is utilized.
@@ -453,7 +459,27 @@ main="PSIS reliability diagnostics for hierarchical model")
 
 
 ```
-When inspecting the comparison plots, the first clear observation is that all Pareto k diagnostic values are between $\infty$ and 0.5, so the PSIS-LOO -values of both models can be considered reliable. The values over 0.5 start to be problematic, which could lead to the model re-evaluation, but in our case, the values are all low enough. 
+When inspecting the comparison plots, the first clear observation is that all Pareto k diagnostic values are between $\infty$ and 0.5, so the PSIS-LOO -values of both models can be considered reliable. The values over 0.5 start to be problematic, which could lead to the need to re-evaluate the model, but in our case, the values are all low enough. Next, it is important to check how large p_loo is compared to the number of parameters of the model. In general, if p_loo is less than or approximately equal to the number of model parameters, the model can be considered well specified. The number of parameters of the pooled model is 2 when its p_loo is 2.5. Thus, the percentage of parameters is exceeded by 25%. Respectively, the number of parameters of the hierarchical model is 22, when its p_loo value is 22.4. Thus, the percentage of parameters is exceeded by 0.9%. The p_loo value shows that the hierarchical model's performance seems more reasonable when considered the problem in-hand. 
+
+The last PSIS-LOO's comparison variable, which we are going to inspect, is an elpd_loo. The less negative the value of elpd_loo is, the better the fit of the model to that problem can be considered to be. The values of elpd_loo are presented above. Now, it's easy starting to be easy to deduce that the hierarchical model is a better fit for this problem. Its elpd_loo value is over 900  higher than the corresponding value of the pooled model. 
+
+
+# 10. Sensitivity analysis (Priors)
+
+# 11. Issues and potential improvements
+In this section, we are going to list possible issues related to, for example, the used models. From the problems, we get directly to possible development ideas that could be interesting to implement in the future. The first potential issue is related to data reliability, which always has to be taken into consideration when data from open-source is used. In the worst case, the use of manipulated data can lead to significantly detrimental conclusions, for example, when considering policy recommendations. At the beginning of the work, we looked at the source of the data from many different angles, which makes it seem unlikely that the data storers had modified it. A greater concern is the reliability of samples from different countries. For example, it may be in the interests of some parties to beautify the country's CO2 emissions, making the data unreliable. This potential issue should be kept in mind when looking at the results. 
+
+Another issue arose at the prediction stage when the probability distribution provided the possibility to get values below zero, which depending on the definition, either does not make sense or means the removal of CO$_2$ emissions from the atmosphere (carbon negativity). If we choose carbon negativity as the definition of negative values, the distribution is too broad (too high a probability for carbon negativity) but otherwise possible. If, on the other hand, we think that emissions cannot be negative (as in the choice of a priori), the tail is a real issue. The possible improvement is to use some other hierarchical model than Gaussian when modeling this phenomenon. Using a different hierarchical model could be an excellent experimental topic for further development of the work.
+
+As mentioned above, the one possible improvement is to use a different hierarchical model to the same dataset (one possibility could be, for example, a lognormal model). One could also divide countries into different sets based on different geographical locations and use these as groups in a hierarchical model. The division could also be made based on some other characteristic, in which case different conclusions could also be drawn from the results. The observation period can also be changed, and its effect on averages and forecasts monitored. One development idea that would require a little more know-how from the implementer would be to study the effect of  CO2 emissions on temperature and use the results of the work to predict temperature development in different regions. An implementation of the same style, but which is taken further, is shown in Figure \ref{fig:annual_global_emission}. Figure \ref{fig:annual_global_emission} shows the effect of various policy recommendations on emissions and thus on temperature.
+
+```{r annual_global_emiss, echo=FALSE, fig.cap="\\label{fig:annual_global_emission}Annual global emissions -- ", out.width = '100%'}
+knitr::include_graphics("annual_global_emission.png")
+```
+
+# 12. What was learned
+
+# 13. Self-reflection
 
 
 ```{r eval=FALSE}
