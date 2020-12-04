@@ -52,13 +52,6 @@ Three graphs are being plotted below. On the first row, we investigate our sampl
 
 On the second row, we plotted the sample countries' emissions standardized with the population of the country. Thus, we obtained a "CO2 per capita" -estimate for each country. This is the data that we used later in our models. Especially between 1950s and 70s, western countries played a significant role as the big emitters. However, during 2000s, the situation has changed as western countries have systematically been able to lower their emissions per capita. At the same time developing countries have been increasing their emissions and thus the situation has tied.
 
-```{r echo=FALSE, message=FALSE}
-install.packages("bayestestR")
-install.packages("remotes")
-remotes::install_github("avehtari/BDA_course_Aalto",
-                        subdir = "rpackage", upgrade="never")
-```
-
 ```{r message=FALSE}
 # Loading the needed libraries
 library(rstan)
