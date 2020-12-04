@@ -33,35 +33,34 @@ In this project, our goal is to get familiar with the CO2-emissions trends from 
 
 We are examining a scenario in which emissions continue to develop at a historical rate, and the necessary reductions are not achieved. To simplify our modeling of the predictive distributions, we presume that the development in the future reflects the past. Thus, parameters influencing in the growth of the CO2-emissions, e.g., population growth and development of technology, are already affecting in the past data. This hypothesis was made because we don't have actual knowledge about the effects of single parameters. Therefore, predicting their effects in the future is simply impossible with our existing knowledge.
 
+\newpage
 
 # 2. Data description
 
 
-Our CO$_2$ data was obtained from \textit{Our World in Data} (OWID) web page (https://ourworldindata.org/co2-and-other-greenhouse-gas-emissions. Accessed 3 December 2020) and the actual \textit{CSV} file from OWID GitHub page (https://github.com/owid/co2-data. Accessed 3 December 2020). As mentioned earlier, climate change is a hot topic in the daily news, and there is a lot of studies and research concerning how CO$_2$ emissions are influencing global warming. The data set was also used, for example, when researchers studied the climate impact of the different policy recommendation which targeted to reduce greenhouse gases from the atmosphere.
+Our CO$_2$ data was obtained from \textit{Our World in Data} (OWID) web page (https://ourworldindata.org/co2-and-other-greenhouse-gas-emissions. Accessed December 3, 2020) and the actual \textit{CSV} file from OWID GitHub page (https://github.com/owid/co2-data. Accessed December 3, 2020). As mentioned earlier, climate change is a hot topic in the daily news, and there is a lot of studies and research concerning how CO$_2$ emissions are influencing global warming. The data set was also used, for example, when researchers studied the climate impact of the different policy recommendations which targeted to reduce greenhouse gases from the atmosphere.
 
 ## 2.1 Choosing the sample and estimating it's resemblance
 
-In our modeling, we selected 19 different countries from the OWID data set and examined CO$_2$ data between the years 1950-2018. We decided to not take all countries into the modeling as the are holes and missing information in the dataset. The countries we chose cover the whole globe and are roughly evenly distributed across continents. However, we estimated that the data is probably more reliable in the western countries and thus were more open-minded in selecting them. Even that said, we think that the geographical distribution covers the whole world pretty well. Another important aspect of division is the division between large and small emitters. Even though it is quite difficult to perform such division, we tried to take countries from both ends pretty evenly. However, it is worth noting that this division was performed intuitively and it does not rely on any actual metrics. Lastly, we thought that the division between developing and western countries is extremely important to consider too. Therefore, this aspect was taken into account when considering the sample countries, too. We estimated that the number of developing countries in the world exceeds the number of western countries and thus tried to choose developing countries a bit more into the sample set.
+In our modeling, we selected 19 different countries from the OWID data set and examined CO$_2$ data between the years 1950-2018. We decided to not take all countries into the modeling as there is missing information in the dataset. The countries we chosen to cover the whole globe and are roughly evenly distributed across continents. However, we estimated that the data is probably more reliable in the western countries and thus were more open-minded in selecting them. Even that said, we think that the geographical distribution covers the whole world well. Another important aspect of division is the division between large and small emitters. Even though it is quite difficult to perform such division, we tried to take countries from both ends evenly. However, it is worth noting that this division was performed intuitively and it does not rely on any actual metrics. Lastly, we thought that the division between developing and western countries is extremely important to consider too. Therefore, this aspect was taken into account when considering the sample countries, too. We estimated that the number of developing countries in the world exceeds the number of western countries and thus tried to choose developing countries a bit more into the sample set.
 
-For the reasons presented above, we believe that the sample we use in this project, resembles the situation in the world quite well. However, we estimated that it is possible that the sample is slightly biased towards western countries. It is important to note this since we examine results where the CO2-emissions data is standardized with the countries' population. As the CO2-emissions are standardized, the importance of correct ratio (number) of countries between different division-aspects increases. As the sample may
-be a bit biased, the results may propose higher numbers of CO2-emissions per capita in the world than what they actually are.
+For the reasons presented above, we believe that the sample we use in this project, resembles the situation in the world quite well. However, we estimated that it is possible that the sample is slightly biased towards western countries. It is important to note this since we examine results where the CO2-emissions data is standardized with the countries' population. As the CO2-emissions are standardized, the importance of correct ratio (number) of countries between different division-aspects increases. As the sample may be a bit biased, the results may propose higher numbers of CO2-emissions per capita in the world than what they actually are.
 
 ## 2.2 Plotting the sample
 
-Below is plotted three graphs. On the first row, we investigate our sample countries' CO2-emissions by country. Please note
-the y-axis difference between large and small emitters in the graphs. It is worth noting that the CO2-emissions development of China
-is very concerning as it has almost doubled its CO2-emissions during the last 15 years. In addition, India, Greece, Morocco, Peru and Mongolia has been showing a bit concerning trend during last decades.
+Three graphs are being plotted below. On the first row, we investigate our sample countries' CO2-emissions by country. Please note the y-axis difference between large and small emitters in the graphs. It is worth noting that the CO2-emissions development of China is very concerning as it has almost doubled its CO2-emissions during the last 15 years. In addition, India, Greece, Morocco, Peru and Mongolia have been showing a bit concerning trends during the last decades.
 
-On the second row, we plotted the sample countries' emission standardized with the population of the country. Thus, we obtained
-a "CO2 per capita" -estimate for each country. This is the data that we used later in our models. Especially between 1950s and 70s, western countries play significant role as the big emitters. However, during 2000s, the situation has changed as western countries have systematically been able to lower their emissions per capita. At the same time, developing countries have been increasing their
-emissions and thus the situation has tied.
+On the second row, we plotted the sample countries' emissions standardized with the population of the country. Thus, we obtained a "CO2 per capita" -estimate for each country. This is the data that we used later in our models. Especially between 1950s and 70s, western countries played a significant role as the big emitters. However, during 2000s, the situation has changed as western countries have systematically been able to lower their emissions per capita. At the same time developing countries have been increasing their emissions and thus the situation has tied.
 
 ```{r echo=FALSE, message=FALSE}
 install.packages("bayestestR")
 install.packages("remotes")
 remotes::install_github("avehtari/BDA_course_Aalto",
                         subdir = "rpackage", upgrade="never")
+```
 
+```{r message=FALSE}
+# Loading the needed libraries
 library(rstan)
 library(loo)
 library(ggplot2)
@@ -164,13 +163,15 @@ grid.arrange(
 #plot5
 ```
 
+\newpage
+
 # 3 Model description
 
-In this chapter, we will present our model structures and stan codes of our implementation of a non-hierarchical pooled model and a hierarchical model. Before this, we briefly introduce the mathematical structure behind the models.
+In this chapter, we will present our model structures of our implementation of a non-hierarchical pooled model and a hierarchical model. Before this, we briefly introduce the mathematical structure behind the models.
 
 ## 3.1 Pooled model
 
-A pooled model is one of the most straightforward model structure to understand. In the pooled model, all data points are used as one "pool" without considering groups or particular features different pieces of data could have. The whole dataset is used as a one, and modeling is done based on that collection of data. If we assume that priors of the mean and standard deviation follow standard normal distributions, we can present the mathematical structure of the pooled model in the form
+A pooled model is one of the most straightforward model structures to understand. In the pooled model, all data points are used as one "pool" without considering groups or particular features different pieces of data could have. The whole dataset is used as a one, and modeling is done based on that collection of data. If we assume that priors of the mean and standard deviation follow standard normal distributions, we can present the mathematical structure of the pooled model in the form
 
 
 \begin{align}\label{eq1}
@@ -184,11 +185,14 @@ We used these standardized normal priors just for illustration purposes, and the
 
 ## 3.2 Hierarchical normal model
 
-Unlike the previous model, the hierarchical model takes into account the possibility that some of the subgroups of the whole dataset have similar properties. Due to this observation, the hierarchical model presents a “hyper-prior” that is common to each group. For each group, its posterior distribution of mean is calculated using that hyper-prior, taking into account only all samples belonging to that group. This property can be illustrated in Figure \ref{fig:hier_sketch}. In Figure \ref{fig:hier_sketch}, $\tau$ is a hyper-parameter and $\theta_i$s presents modeled parameter of each group.
+Unlike the previous model, the hierarchical model takes into account the possibility that some of the subgroups of the whole dataset have similar properties. Due to this observation, the hierarchical model presents a “hyper-prior” that is common to each group. For each group, its posterior distribution of mean is calculated using that hyper-prior, taking into account only all samples belonging to that group. This property can be illustrated in Figure \ref{fig:hier_sketch}. In Figure \ref{fig:hier_sketch}, $\tau$ is a hyper-parameter and $\theta_i$s present modeled parameters of each group.
 
-```{r hier, echo=FALSE, fig.cap="\\label{fig:hier_sketch}A hierarchical model -- ", out.width = '100%'}
+
+```{r hier, echo=FALSE, fig.cap="\\label{fig:hier_sketch}A hierarchical model (From Aki Vehtari's slides, chapter 5. Accessed December 4, 2020).", out.width = '100%'}
 knitr::include_graphics("hier_model.png")
 ```
+
+\newpage
 
 We can summarize the hierarchical model mathematically as
 
@@ -202,43 +206,48 @@ We can summarize the hierarchical model mathematically as
 \end{align}
 
 
-where $mu_0$ and $sigma_0$ are hyper-priors for mean and standard deviation. Again, we used these normal distributions just for illustration purposes. In addition, we assumed through the project that all the groups have a common variance ($\sigma$ in [\ref{eq2}]).
+where $\mu_0$ and $\sigma_0$ are hyper-priors for mean and standard deviation. Again, we used these normal distributions just for illustration purposes. In addition, we assumed through the project that all the groups have a common variance ($\sigma$ in [\ref{eq2}]).
+
+\newpage
 
 # 4. Priors
 
 For our modeling, we needed to define hyper priors $\mu_0$ and $\sigma_0$. In addition, common $\sigma$ was defined for the hierarchical model's standard deviation between data points.
 
-Our first goal was to define the hyper prior $\mu_0$. To aid this problem, we searched information in the internet about country-wise CO2-emissions per capita. The figure below illustrates the results that we found. The figure is taken from https://www.economicshelp.org/blog/10296/economics/top-co2-polluters-highest-per-capita/ on the 1st of December, 2020.
+Our first goal was to define the hyper prior $\mu_0$. To aid this problem, we searched for information on the internet about country-wise CO2-emissions per capita. The figure below illustrates the results that we found. The figure is taken from https://www.economicshelp.org/blog/10296/economics/top-co2-polluters-highest-per-capita/ on the December 1, 2020.
 
-```{r co2-emissions-per-capit, echo=FALSE, fig.cap="\\label{fig:co2-emissions-per-capita}Selected countries CO2 emissions per capita \\newline Source: https://www.economicshelp.org/blog/10296/economics/top-co2-polluters-highest-per-capita/ \\newline Accessed December 1, 2020.", out.width = '100%'}
+```{r co2-emissions-per-capit, echo=FALSE, fig.cap="\\label{fig:co2-emissions-per-capita}Selected countries CO2 emissions per capita", out.width = '100%'}
 knitr::include_graphics("co2-emissions-per-capita.png")
 ```
 
-Results shown in the Figure \ref{fig:co2-emissions-per-capita} represent selected countries on year 2016 and are pretty well aligned with the CO2-emissions per capita that we calculated and drew at our data description section. However, it seems that the underlying dataset is not the same that we decided to use in this project. The idea of searching external information from the internet is to obtain a better understanding about the underlying truth without having to use our own dataset at this point. We want to emphasize that at this point we used our dataset only to estimate whether our own dataset is aligned with the other information found from the internet or not aligned at all.
+Results shown in the Figure \ref{fig:co2-emissions-per-capita} represent selected countries in the year 2016 and are pretty well aligned with the CO2-emissions per capita that we calculated and drew at our data description section. However, it seems that the underlying dataset is not the same what we decided to use in this project. The idea of searching external information from the internet is to obtain a better understanding about the underlying truth without having to use our own dataset at this point. We want to emphasize that we used our dataset only to estimate whether it is aligned with the other information found from the internet or not aligned at all.
 
 ## 4.1 Choosing hyper prior mu
 
-With the information that we obtained from investigating the internet more thoroughly, we were able to estimate the order of magnitude for the CO2-emissions per capita. Considering our range of fluctuation, we can first exclude the results below zero. There won't be negative values in CO2-emissions calculations. On the other end, we estimated that the values won't exceed 50 kilo tonns per year per country. However, given the information that we were able to obtain, we believe that there is a lot of space for error in value range [0, 50]. Thus, we believe that the actual expected mean for hyper prior $\mu_0$ is closer to 0 than 50. We estimated that most of the values should be somewhere between 0 and 30. Therefore, the expected value for $\mu_0$ was placed to 15: $E(\mu_0) = 15$. With the observations presented above, we were finally able to estimate the distribution for $\mu_0$: $\mu_0 \sim logN(2.58, 0.5)$ seems to be reasonable. With this distribution and values, $\mu_0$ is strictly restricted to the positive values, has it's expected value $E(\mu_0) \approx 15.0$ and the $P(\mu_0 < 50) \approx 1.00$.
+With the information that we obtained from investigating the internet more thoroughly, we were able to estimate the order of magnitude for the CO2-emissions per capita. Considering the range of fluctuation, we can first exclude the results below zero. There won't be negative values in CO2-emissions calculations. On the other end, we estimated that the values won't exceed 50 kilo tons per year per country. However, given the information that we were able to obtain, we believe that there is a lot of space for error in value range [0, 50]. Thus, we believe that the actual expected mean for hyper prior $\mu_0$ is closer to 0 than 50. We estimated that most of the values should be somewhere between 0 and 30. Therefore, the expected value for $\mu_0$ was placed to 15: $E(\mu_0) = 15$. With the observations presented above, we were finally able to estimate the distribution for $\mu_0$: $\mu_0 \sim logN(2.58, 0.5)$ seems to be reasonable. With this distribution and values, $\mu_0$ is strictly restricted to the positive values, has it's expected value $E(\mu_0) \approx 15.0$ and the $P(\mu_0 < 50) \approx 1.00$.
 
 ## 4.2 Choosing hyper prior sigma
 
-Next, we had to consider the distribution for the hyper prior $\sigma_0$. Again, restricting the values to positive side only seems reasonable. In our consideration, we prioritized that the probability for $\sigma_0$ being zero would be low but on the contrary, the values close to zero would have high probability. Estimating the appropriate tail for the distribution was rather difficult with the information that we were able to obtain. Therefore, we used iterative method to find suitable hyper prior $\sigma_0$. We ended up to a Gamma distribution $Gamma(\alpha = 2.5,\beta = 0.8)$. This distribution gives $E(\sigma_0) = 1$ and $P(\sigma_0 < 6) \approx 0.99$. This seems reasonable, as we do not want to narrow the $\mu_j$ distributions too much with our prior choices.
+Next, we had to consider the distribution for the hyper prior $\sigma_0$. Again, restricting the values to positive side only seems reasonable. In our consideration, we prioritized that the probability for $\sigma_0$ being zero would be low but on the contrary, the values close to zero would have high probability. Estimating the appropriate tail for the distribution was rather difficult with the information that we were able to obtain. Therefore, we used iterative method to find suitable hyper prior $\sigma_0$. We ended up to a Gamma distribution $Gamma(\alpha = 2.5,\beta = 0.8)$. This distribution gives $E(\sigma_0) = 1$ and $P(\sigma_0 < 6) \approx 0.99$. This seems reasonable as we do not want to narrow the $\mu_j$ distributions too much with our prior choices.
 
 ## 4.3 Choosing common sigma for observations
 
-Choosing the common sigma for given data points (observations), one can try to answer to a question, how big a jump could the data make between observations n and n+1. Given our relatively small value range [0,50] and a fact that the data observations derive from countries' CO2-emissions per capita, we consider the jumps to be only some unit digits at most. For example, with standard deviation of 2, the probability that the "random" jump from n to n+1 being greater than 2 is roughly 0.3, which is relatively big probability for such a big jump given circumstances. We believe that the changes within country CO2-emissions per capita tend to be smaller. Therefore, inverse-chi-square distribution with degree of freedom 2.5 seems reasonable. With $\sigma \sim inv-chi(2.5)$, all values are positive, expected value is roughly 0.5 and $P(\sigma) < 2 \approx 0.86$. However, this distribution leaves the possibility for the sigma being even higher than 2, which option we want to leave open.
+Choosing the common sigma for given data points (observations), one can try to answer to a question, how big a jump could the data make between observations n and n+1. Given our relatively small value range [0,50] and a fact that the data observations derive from countries' CO2-emissions per capita, we consider the jumps to be only some unit digits at most. For example, with standard deviation of 2, the probability that the "random" jump from n to n+1 being greater than 2 is roughly 0.3, which is relatively big probability for such a big jump given circumstances. We believe that the changes in within-country CO2-emissions per capita tend to be smaller. Therefore, inverse-chi-square distribution with degree of freedom 2.5 seems reasonable. With $\sigma \sim inv-chi(2.5)$, all values are positive, expected value is roughly 0.5 and $P(\sigma) < 2 \approx 0.86$. However, this distribution leaves the possibility for the sigma to be even higher than 2, which option we want to leave open.
 
+\newpage
 
 # 5. Stan
 
+In this chapter, we'll present our full Stan codes that were used in the modeling. Below is presented both, pooled and hierarchical, complete models. However, in order to speed up our tests, we left logarithmic likelihood -part out before LOO-CV phase. The code is exactly the same as presented below, but just does not generate log_lik quantities every time. The naming of the stan-files is intuitive, so reader can easily understand, which stan code was being used at which point.
+
 ## 5.1 Pooled model
 
-Example code for pooled model
+Stan code for pooled model
 
 ```{stan output.var='not_important', , eval = FALSE, tidy = FALSE}
 data {
   int <lower=0> N; // number of observations
-  vector[N] y; // observations
+  vector[N] y;     // observations
 }
 
 parameters {
@@ -247,8 +256,8 @@ parameters {
 }
 
 model {
-    mu ~ lognormal(0, 10); // priors from last week
-    sigma ~ inv_chi_square(1); // priors from last week
+    mu ~ lognormal(0, 10);
+    sigma ~ inv_chi_square(1);
   
   
   // pooled model likelihood, common mu and sigma for all observations
@@ -260,7 +269,7 @@ generated quantities {
     real ypred;
     vector[N] log_lik;
   
-  //predictive distribution for any machine
+  //predictive distribution for next year
     ypred = normal_rng(mu, sigma);
   
     for (i in 1:N){
@@ -269,39 +278,37 @@ generated quantities {
 }
 ```
 
-
-
 ## 5.2 Hierarchical model
 
-Example code for hierarchical model
+Stan code for hierarchical model
 
 ```{stan output.var='not_important2', , eval = FALSE, tidy = FALSE}
 
 data {
     int<lower=0> N;            // Number of observations
     int<lower=0> N_c;          // Number of countries
-    vector[N_c] y[N];               // Observations
-    real hyper_mu_in_mu;        // Prior for hyper_mu mu
-    real hyper_mu_in_sigma;     // Prior for hyper_mu sigma
-    real hyper_sigma_in_alpha;  // Prior for hyper_sigma alpha
-    real hyper_sigma_in_beta;   // Prior for hyper_sigma beta
-    real common_sigma_in;       // Prior for common sigma
+    vector[N_c] y[N];          // Observations
+    real hyper_mu_in_mu;       // Prior for hyper_mu mu
+    real hyper_mu_in_sigma;    // Prior for hyper_mu sigma
+    real hyper_sigma_in_alpha; // Prior for hyper_sigma alpha
+    real hyper_sigma_in_beta;  // Prior for hyper_sigma beta
+    real common_sigma_in;      // Prior for common sigma
 }
 
 parameters {
-    vector[N_c] mu; // group means
+    vector[N_c] mu;            // group means
     real hyper_mu;             // prior mean
     real<lower=0> hyper_sigma; // prior std constrained to be positive
-    real<lower=0> sigma;  // COMMON std constrained to be positive
+    real<lower=0> sigma;       // common std constrained to be positive
     
 }
 
 model {
-    hyper_mu ~ lognormal(hyper_mu_in_mu, hyper_sigma_in_sigma);     // weakly informative hyper-prior
-    hyper_sigma ~ gamma(hyper_sigma_in_alpha, hyper_sigma_in_beta);   // weakly informative hyper-prior
+    hyper_mu ~ lognormal(hyper_mu_in_mu, hyper_sigma_in_sigma);     // hyper-prior
+    hyper_sigma ~ gamma(hyper_sigma_in_alpha, hyper_sigma_in_beta); // hyper-prior
     
-    mu ~ normal(hyper_mu, hyper_sigma); // population prior with unknown parameters   
-    sigma ~ inv_chi_square(common_sigma_in); // weakly informative prior for group (common) std
+    mu ~ normal(hyper_mu, hyper_sigma);   
+    sigma ~ inv_chi_square(common_sigma_in); // prior for group (common) std
     
     for (j in 1:N_c) {
           y[ ,j] ~ normal(mu[j], sigma); // likelihood
@@ -310,11 +317,16 @@ model {
 }
 
 generated  quantities {
-    real y_pred;
+    real y_pred_new_country; // next year for country outside the dataset 
+    real y_pred_SAU;         // next year for Saudi-Arabia
+    real y_pred_FIN;         // next year for Finland
+    
+    y_pred_new_country = normal_rng(hyper_mu, hyper_sigma);
+    y_pred_SAU = normal_rng(mu[12], sigma);
+    y_pred_FIN = normal_rng(mu[6], sigma);
+    
     vector[N_c] log_lik[N];
-    
-    
-    y_pred = normal_rng(hyper_mu, sigma);
+
     
     for (j in 1:N_c) {
         for (i in 1:N) {
@@ -324,11 +336,13 @@ generated  quantities {
 }
 ```
 
+\newpage
+
 # 6. Model running
 
 The non-hierarchical and hierarchical stan models from chapter 5 are compiled and sampled in this section. We will explain the used parameters as the section proceeds.
 
-```{r message=FALSE}
+```{r message=FALSE, warning=FALSE}
 
 df_data <- data.frame(years=seq(1950,2018), data_co2_population)
 df_plot <- melt(data = df_data, id.vars = "years", variable.name = "country")
@@ -351,9 +365,11 @@ pool_fit <- rstan::sampling(object = pool_model,
                             refresh = 0)
 ```
 
-We need the total number of observations to be able to run the pooled model, and it's saved to variable N. Vectored version of data is also required by the pooled model. We chose 1000 as the number of iterations per chain, as it has also worked relatively reliably in previous work on the course. We used one fifth of the iterations in the warm-up sample to ensure that the chains were close to the maximum probability mass when true iterations start. At this point, the model without logarithmic likelihood is used to make code compiling faster. Lots of more information about function *stan::stan_model* and *stan::sampling* is found from RStan documentation. 
+We need the total number of observations to be able to run the pooled model and it's saved to variable N. Vectored version of data is also required by the pooled model. We chose 1000 as the number of iterations per chain as it has also worked relatively reliably in previous work on the course. We used a fifth of the iterations in the warm-up sample to ensure that the chains were close to the maximum probability mass when true iterations start. To get more thorough understanding why we used only 1000 iterations with only 200 warm-up samples, please refer to chapter 7 "Convergence diagnostics".
 
-```{r message=FALSE}
+At this point, the model without logarithmic likelihood is used to make code compiling faster. Lots of more information about function *stan::stan_model* and *stan::sampling* is found from RStan documentation. 
+
+```{r message=FALSE, warning=FALSE}
 
 hier_data <- list(N = nrow(data_co2_population),
                   N_c = ncol(data_co2_population),
@@ -377,6 +393,8 @@ hier_fit <- rstan::sampling(object = hier_model,
 
 When running the hierarchical model, the CO$_2$ data is given in matrix form. The number of iterations and the number of warm-ups is the same as in the pooled model presented above. One group is the one country in this model, so the number of groups is the same as the number of columns in data.
 
+\newpage
+
 # 7. Convergence diagnostics
 
 We can inspect the convergence of chains using, for example, *potential scale reducing factor* $\hat{R}$ and \emph{effective sample size} (ESS). The first of these, $\hat{R}$, examines stationarity and mixing of chains. Correspondingly, the effective sample size takes into account the autocorrelation between the samples in a chain. More information about mathematics of these diagnostics can be found in (https://arxiv.org/pdf/1903.08008.pdf. Accessed 3 December 2020). Let's start by monitoring the results with \emph{monitor} function, which also reveals the convergence quantities of chains.
@@ -389,25 +407,24 @@ First of all, we can see that $\hat{R}$s for both models are 1 or 1.01, which in
 
 The convergence of the model simulations was sufficient already on the first try as we used the 2000 iteration with 1000 warm-up samples. With the try-and-error method, we were able to deduce that there was no need for over 1000 iterations, which significantly reduced simulations' execution time. The final number of iterations for each chain was obtained through testing and monitoring. Lowering down the total number of iterations, to for example 500, increased the R-Hat value for some $\mu$s. After testing and monitoring the effect of changing the number of iterations within each chain, it was decided that the sufficient number of iterations is 1000.
 
-Using the same logic, we obtained the number of warm-up samples (200) through trial and error. We noticed that even 50 warm-up samples were sufficient - in some cases - to produce good enough convergence after the warm-up period. However, there were some fluctuations in the reliability of the testing phase, i.e., there were some individual test cases where the convergence was insufficient. However, we noticed through our testing phase that the use of half of the samples as warm-ups seemed to be too much. This means that the algorithm could find a higher probability density area with less iterations. Therefore, the iterations after 200 warm-ups were already converging towards the final probability distribution.
+Using the same logic, we obtained the number of warm-up samples (200) through trial and error. We noticed that even 50 warm-up samples were sufficient - in some cases - to produce good enough convergence after the warm-up period. However, there were some fluctuations in the reliability of the testing phase, i.e., there were some individual test cases where the convergence was insufficient. However, through our testing phase, we noticed that the use of half of the samples as warm-ups seemed to be unnecessarily large. This means that the algorithm could find a higher probability density area with less iterations. Therefore, the iterations after 200 warm-ups were already converging towards the final probability distribution.
+
+\newpage
 
 # 8. Posterior predictive checks
 
-```{r echo=FALSE, message=FALSE}
-pooled_plotter_posterior_pred <- function() {
-  pooled_df = data.frame(rstan::extract(pool_fit, permuted=T))
-  
-  #Histogram
-  hist(pooled_df$ypred, 
-       breaks = 100,
-       xlab = "Mean of the dataset",
-       col = "lightyellow",
-       main="Plot X. \nPooled model: Predictive distribution of the mean")
-}
-```
-
 ```{r fig2, fig.height=4, fig.width=8, fig.align="center", echo=FALSE, message=FALSE}
-pooled_plotter_posterior_pred()
+pooled_df = data.frame(rstan::extract(pool_fit, permuted=T))
+  
+#Histogram
+ggplot(pooled_df, aes(x=ypred)) +
+  geom_histogram(bins = 100,
+                 color = "black",
+                 fill = "lightyellow") +
+  ggtitle("Plot 4. \nPooled model: Predictive distribution of the mean") +
+  xlab("Mean of the dataset") +
+  ylab("")
+
 
 hier_df = data.frame(rstan::extract(hier_fit, permuted=T))
 hier_hist_df <- melt(hier_df %>% select(starts_with('y_pred')))
@@ -426,25 +443,26 @@ ggplot(hier_hist_df, aes(x = value)) +
              linetype = "dashed") +
   geom_vline(aes(xintercept=mean(hier_df$y_pred_SAU)),
              linetype = "dashed") +
-  geom_vline(aes(xintercept=mean(hier_df$y_pred_new_county)),
+  geom_vline(aes(xintercept=mean(hier_df$y_pred_new_country)),
              linetype = "dashed") +
-  ggtitle("Plot X. \nHierarchical model: Predictive distributions of means of selected countries.") +
+  ggtitle("Plot 5. \nHierarchical model: Predictive distributions of means of selected countries.") +
         xlab("CO2-emissions per capita") +
         ylab("") +
   theme(legend.position="top")
 ```
-```{r}
+
+```{r echo=FALSE}
 mcse_all <- bayestestR::mcse(hier_fit)
 mcse_new <- round(mcse_all$MCSE[22], 2)
 mcse_sau <- round(mcse_all$MCSE[23], 2)
 mcse_fin <- round(mcse_all$MCSE[24], 2)
 
-mean_new <- round(mean(hier_df$y_pred_new_county), 1)
+mean_new <- round(mean(hier_df$y_pred_new_country), 1)
 mean_sau <- round(mean(hier_df$y_pred_SAU), 1)
 mean_fin <- round(mean(hier_df$y_pred_FIN), 1)
 
-msce_quantile_new_low <- mcse_quantile(hier_df$y_pred_new_county, 0.05)$mcse
-msce_quantile_new_high <- mcse_quantile(hier_df$y_pred_new_county, 0.95)$mcse
+msce_quantile_new_low <- mcse_quantile(hier_df$y_pred_new_country, 0.05)$mcse
+msce_quantile_new_high <- mcse_quantile(hier_df$y_pred_new_country, 0.95)$mcse
 
 msce_quantile_sau_low <- mcse_quantile(hier_df$y_pred_SAU, 0.05)$mcse
 msce_quantile_sau_high <- mcse_quantile(hier_df$y_pred_SAU, 0.95)$mcse
@@ -452,23 +470,24 @@ msce_quantile_sau_high <- mcse_quantile(hier_df$y_pred_SAU, 0.95)$mcse
 msce_quantile_fin_low <- mcse_quantile(hier_df$y_pred_FIN, 0.05)$mcse
 msce_quantile_fin_high <- mcse_quantile(hier_df$y_pred_FIN, 0.95)$mcse
 
-quantile_new <- round(quantile(hier_df$y_pred_new_county, c(0.05, 0.95)), 0)
+quantile_new <- round(quantile(hier_df$y_pred_new_country, c(0.05, 0.95)), 0)
 quantile_sau <- round(quantile(hier_df$y_pred_SAU, c(0.05, 0.95)), 0)
 quantile_fin <- round(quantile(hier_df$y_pred_FIN, c(0.05, 0.95)), 1)
 ```
 
-The predictive distribution of CO$_2$ per capita emission of the Kingdom of Saudi Arabia (SAU) is presented above. The mean of the predictive distribution is `r mean_sau` with rounded MCSE `r mcse_sau`. A standard deviation for Saudi-Arabia is 2.4, which produced moderately wide distribution if compared to posterior distributions of the means. Comparing this to the time-series figure in Section 2, the predicted value appears to be slightly too small. That's due to the fast increase in emissions which happened between 1950-1980. Our hierarchical model also counts values from that time interval, which causes too small values from the predictive distribution. Otherwise, the shape of the distribution looks as expected.
+The predictive distribution of CO$_2$ emissions per capita of the Kingdom of Saudi Arabia (SAU) is presented above. The mean of the predictive distribution is `r mean_sau` with rounded MCSE `r mcse_sau`. A standard deviation for Saudi-Arabia is 2.4, which produced moderately wide distribution if compared to posterior distributions of the means. Comparing this to the time-series plot in Section 2, the predicted value appears to be slightly too small. That's due to the fast increase in emissions which happened between 1950-1980. Our hierarchical model also counts values from that time interval, which causes too small values from the predictive distribution. Otherwise, the shape of the distribution looks as expected.
 
-The mean of Finland's (FIN) predictive distribution is roughly `r mean_new`, which seems to be correct comparing it to the development of previous years (Section 2 picture).  There is also a decent amount of uncertainty in distribution, which is seen from the histogram or if inspecting the quantiles of distributions. That's a moderately conservative distribution, and it's not possible to do accurate estimates based on this distribution. It still can give an estimate from which broad conclusions can be drawn about the level of emissions. For example, if we compare SAU's and FIN's predictive distribution, the higher level of SAU emissions can be deduced, although accurate estimates could not be made.
+The mean of Finland's (FIN) predictive distribution is roughly `r mean_new`, which seems to be correct comparing it to the development of previous years (Section 2 picture). There is also a decent amount of uncertainty in distribution, which is seen from the histogram or if inspecting the quantiles of distributions. That's a moderately conservative distribution, and it's not possible to do accurate estimates based on this distribution. It still can give an estimate from which broad conclusions can be drawn about the level of emissions. For example, if we compare SAU's and FIN's predictive distribution, the higher level of SAU emissions can be deduced, although accurate estimates could not be made.
 
-Next, let's analyze the prediction distribution of our hierarchical model for the new country. The first positive sign is that the mean settled down to about `r mean_new`, which is also the most likely possibility inferred from the Section 2 figure based on the data used. The moderate large standard deviation also limits its predictive power for this forecast variable, but again gives direction, which could be the new country's emissions level. Usage of the normal gaussian hierarchical model is causing the distribution to spread to the negative consumption side, which is an possible downside. We are going to discuss potential improvements in Section 11. These same considerations also apply to the sample prediction done from the pooled model. 
+Next, let's analyze the prediction distribution of our hierarchical model for the new country. The first positive sign is that the mean settled down to about `r mean_new`, which is also the most likely possibility inferred from the Section 2 plot 3 based on the data used. The moderately large standard deviation also limits its predictive power for this forecast variable, but again gives direction, which could be the new country's emission level. Usage of the normal Gaussian hierarchical model is causing the distribution to spread to the negative consumption side, which is a possible downside. We are going to discuss potential improvements in Section 11. These same observations also apply to the sample prediction done from the pooled model.
 
+\newpage
 
 # 9. Model comparison
 
-Next, we will present the model comparison between our two models. The comparison is done with the PSIS-LOO stan package. When doing the relative EFF calculation from logarithmic likelihood values, the total number of 4 cores is utilized.
+Next, we will present the model comparison between our two models. The comparison is done with the PSIS-LOO Stan -package. When doing the relative EFF calculation from logarithmic likelihood values, the total number of 4 cores is utilized.
 
-```{r message=FALSE}
+```{r message=FALSE, warning=FALSE}
 
 pool_model_loglik <- rstan::stan_model(file = "pooled_model_stan.stan")
 
@@ -501,17 +520,18 @@ print(loo_hier)
 
 plot(loo_pooled,
 diagnostic=c("k", "n_eff"),
-main="PSIS reliability diagnostics for pooled model")
+main="Plot 6. \nPSIS reliability diagnostics for pooled model")
 
 plot(loo_hier,
 diagnostic=c("k", "n_eff"),
-main="PSIS reliability diagnostics for hierarchical model")
-
+main="Plot 7. \nPSIS reliability diagnostics for hierarchical model")
 
 ```
-When inspecting the comparison plots, the first clear observation is that all Pareto k diagnostic values are between $\infty$ and 0.5, so the PSIS-LOO -values of both models can be considered reliable. The values over 0.5 start to be problematic, which could lead to the need to re-evaluate the model, but in our case, the values are all low enough. Next, it is important to check how large p_loo is compared to the number of parameters of the model. In general, if p_loo is less than or approximately equal to the number of model parameters, the model can be considered well specified. The number of parameters of the pooled model is 2 when its p_loo is about 2.5. Thus, the p_loo exceeds the number of parameters by approximately 25 percent. Respectively, the number of parameters of the hierarchical model is about 22, when its p_loo value is 22.4. Thus, the p_loo exceeds the number of parameters by about 0.9 %. The p_loo value shows that the hierarchical model's performance seems more reasonable when considered the problem in-hand. 
+When inspecting the comparison plots, the first clear observation is that all Pareto k diagnostic values are between $-\infty$ and 0.5, so the PSIS-LOO -values of both models can be considered reliable. The values over 0.5 start to be problematic, which could lead to the need to re-evaluate the model, but in our case, the values are all low enough. Next, it is important to check how large p_loo is compared to the number of parameters of the model. In general, if p_loo is less than or approximately equal to the number of model parameters, the model can be considered well specified. The number of parameters of the pooled model is 2 when its p_loo is about 2.5. Thus, the p_loo exceeds the number of parameters by approximately 25 percent. Respectively, the number of parameters of the hierarchical model is about 22, when its p_loo value is 22.4. Thus, the p_loo exceeds the number of parameters by about 0.9 %. The p_loo value shows that the hierarchical model's performance seems more reasonable when considered the problem in-hand. 
 
-The last PSIS-LOO's comparison variable, which we are going to inspect, is an elpd_loo. The less negative the value of elpd_loo is, the better the fit of the model to that problem can be considered to be. The values of elpd_loo are presented above. Now, it's starting to be easy to deduce that the hierarchical model is a better fit for this problem, as its elpd_loo value is over 900 higher than the corresponding value of the pooled model. In summary, therefore, we can state that our hierarchical model is better than the pooled model. For this reason, we will consider the effect of prior distributions only on the hierarchical model.
+The last PSIS-LOO's comparison variable, which we are going to inspect, is an elpd_loo. The less negative the value of elpd_loo is, the better the fit of the model to that problem can be considered to be. The values of elpd_loo are presented above. Now, it's starting to be easy to deduce that the hierarchical model is a better fit for this problem, as its elpd_loo value is over 900 points higher than the corresponding value of the pooled model. Therefore, in summary, we can state that our hierarchical model is better than the pooled model. For this reason, we will consider the effect of prior distributions only on the hierarchical model.
+
+\newpage
 
 # 10. Sensitivity analysis (Priors)
 
@@ -520,6 +540,7 @@ In this part, we'll examine the effect of priors to the predictive distribution 
 ## 10.1 Choosing differing priors
 
 As a reminder, we decided to use following values to model hyper mu, hyper sigma and common sigma:\newline
+**Used model:**\newline
   hyper_mu $\sim$ lNorm(2.58, 0.5) \newline
   hyper_sigma $\sim$ Gamma(2.5, 0.8) \newline
   sigma $\sim$ inv_chi_square(2.5) \newline
@@ -540,7 +561,7 @@ Our idea is to see what happens if we relax our priors a lot, and on the contrar
 
 ## 10.2 Plotting the results
 
-```{r fig3, fig.height=12, fig.width=8, fig.align="center", echo=FALSE, message=FALSE}
+```{r fig3, fig.height=12, fig.width=8, fig.align="center", echo=FALSE, message=FALSE, warning=FALSE}
 hier_model <- rstan::stan_model(file = "hier_model_stan_without_loglik.stan");
 differing_priors <- NULL
 
@@ -562,7 +583,7 @@ hier_fit_real <- rstan::sampling(object = hier_model,
                             refresh = 0)
 
 mid_result_real = data.frame(rstan::extract(hier_fit_real, permuted=T))
-differing_priors$Finland_Real <- mid_result_real$y_pred_FIN
+differing_priors$Finland_Used <- mid_result_real$y_pred_FIN
 differing_priors <- as.data.frame(differing_priors)
 
 
@@ -607,24 +628,30 @@ differing_priors$Finland_Tightened <- mid_result_tight$y_pred_FIN
 
 #New country
 #Real model new country
-differing_priors$NewCountry_Real <- mid_result_real$y_pred_new_county
+differing_priors$NewCountry_Used <- mid_result_real$y_pred_new_country
 
 
 #Relaxed model new country
-differing_priors$NewCountry_Relaxed <- mid_result_relax$y_pred_new_county
+differing_priors$NewCountry_Relaxed <- mid_result_relax$y_pred_new_country
 
 
 #Tightened model new country
-differing_priors$NewCountry_Tightened <- mid_result_tight$y_pred_new_county
+differing_priors$NewCountry_Tightened <- mid_result_tight$y_pred_new_country
 
 
 #MCMC Areas
-mcmc_areas(differing_priors) + xlab("CO2-emissions per capita (Kilo tonns)")
+mcmc_areas(differing_priors) + 
+  xlab("CO2-emissions per capita (Kilo tons)") +
+  ggtitle("Plot 8. \nPredictive distributions with different priors.")
 ```
 
-We first examine the effect of prior distributions on the forecast outcome for the countries available from the data. The Finnish CO$_2$ emissions per person are used as an example. It can be clearly seen from the figure that the widening or narrowing of the beginning has almost no effect on the result. The means remain within the decimal, and there is no noticeable difference in the standard deviation. The behavior of all the different prediction distribution of the countries closely follows the same phenomenon. The prediction distribution of emissions of countries isn't sensitive with respect to prior choices.
+## 10.3 Observations
 
-The Figure also shows the effect of the change in the initial distribution on the distribution of the new country's emissions. Regarding the form of the distribution, it can first be noted that the change in its mean is not significant between the different prior scenarios. In the case of the tightened initial distribution, the expectation value hits slightly smaller values, but its change is small compared to the change in standard deviation. As can be seen from the Figure, there is only a small difference between the tightened prior and the normally used prior. That suggests that a relatively small change in a narrower direction does not affect the result much, so the distribution is not very sensitive to small changes. The opposite effect occurs in a situation where the prior distributions are chosen to be much wider than in the real situation. Now the widened initial distribution produces a much narrower pattern e.i. the standard deviation is much smaller. This result is somewhat surprising, as the use of a broadened initial distribution would only think to widen the prediction distribution. For this data, however, it appears that the widening of the hyper priors only narrows the prediction distribution calculated using them.
+We first examine the effect of prior distributions on the forecast outcome for the countries available from the data. The Finnish CO$_2$ emissions per person are used as an example. It can be clearly seen from the figure that the widening or narrowing of the beginning has almost no effect on the result. The means remain within the decimal, and there is no noticeable difference in the standard deviation. The behavior of all the different prediction distribution of the countries closely follows the same phenomenon. Thus, we concluse that the prediction distribution of emissions of countries isn't sensitive with respect to prior choices.
+
+On the contrary, Plot 8 shows that the prior distributions have much bigger effect on the new country's predictive distribution of the CO2-emissions. Regarding the form of the distribution, it can first be noted that the change in its mean is not significant between the different prior scenarios. In the case of the tightened initial distribution, the expectation value hits slightly smaller values, but its change is small compared to the change in standard deviation. As can be seen from the plot, there is only a small difference between the tightened prior and the normally used prior. That suggests that a relatively small change in a narrower direction does not affect the result much, so the distribution is not very sensitive to small changes. The opposite effect occurs in a situation where the prior distributions are chosen to be much wider than in our example situation. Now the widened initial distribution produces a much narrower pattern, i.e., the standard deviation is much smaller. This result is somewhat surprising, as the use of a broadened initial distribution would only think to widen the prediction distribution. For this data, however, it appears that the widening of the hyper priors only narrows the prediction distribution calculated using them.
+
+\newpage
 
 # 11. Issues and potential improvements
 
@@ -632,66 +659,285 @@ In this section, we are going to list possible issues related to, for example, t
 
 Another issue arose at the prediction stage when the probability distribution provided the possibility to get values below zero, which depending on the definition, either does not make sense or means the removal of CO$_2$ emissions from the atmosphere (carbon negativity). If we choose carbon negativity as the definition of negative values, the distribution is too broad (too high a probability for carbon negativity) but otherwise possible. If, on the other hand, we think that emissions cannot be negative (as in the choice of a priori), the tail is a real issue. The possible improvement is to use some other hierarchical model than Gaussian when modeling this phenomenon. Using a different hierarchical model could be an excellent experimental topic for further development of the work.
 
-As mentioned above, the one possible improvement is to use a different hierarchical model to the same dataset (one possibility could be, for example, a lognormal model). One could also divide countries into different sets based on different geographical locations and use these as groups in a hierarchical model. The division could also be made based on some other characteristic, in which case different conclusions could also be drawn from the results. The observation period can also be changed, and its effect on averages and forecasts monitored. One development idea that would require a little more know-how from the implementer would be to study the effect of  CO2 emissions on temperature and use the results of the work to predict temperature development in different regions. An implementation of the same style, but which is taken further, is shown in Figure \ref{fig:annual_global_emission}. Figure \ref{fig:annual_global_emission} shows the effect of various policy recommendations on *green house gas* (GHG) emissions and thus on temperature.
-```{r annual_global_emiss, echo=FALSE, fig.cap="\\label{fig:annual_global_emission}Annual global emissions", out.width = '100%'}
+As mentioned above, the one possible improvement is to use a different hierarchical model to the same dataset (one possibility could be, for example, a lognormal model). One could also divide countries into different sets based on different geographical locations and use these as groups in a hierarchical model. The division could also be made based on some other characteristic, in which case different conclusions could also be drawn from the results. The observation period can also be changed, and its effect on averages and forecasts monitored. One development idea that would require a little more know-how from the implementer would be to study the effect of CO2-emissions on temperature and use the results of the work to predict temperature development in different regions. An implementation of the same style, but which is taken further, is shown in Figure \ref{fig:annual_global_emission}. Figure \ref{fig:annual_global_emission} shows the effect of various policy recommendations on *green house gas* (GHG) emissions and thus on temperature.
+
+```{r annual_global_emiss, echo=FALSE, fig.cap="\\label{fig:annual_global_emission}Annual global emissions", out.width="100%"}
 knitr::include_graphics("annual_global_emission.png")
 ```
 
-# 12. Conclusion
+\newpage
+
+# 12. Conclusions
+
+The clear message of the work is that the countries' CO2 emissions are still high and Finland is no exception. The development of China's emissions is worrying and the high per capita values in the Middle East cannot be ignored. CO2 per capita emissions in many African countries are still small, but it is also good to think about future effects in a situation where emissions are rising sharply on that side of the globe. It is crucial to focus on exporting clean technology to countries that are still developing in order to prevent an explosive increase in emissions.
+
 The main result from our data analysis is that the hierarchical model seems to fit better to the problem at hand. Its advantages over the pooled model are noticeable from PSIS-LOO analytics as well as from the fact that every country can be considered separately from other countries when making decisions. Forecasts and predictions can then be made for each country individually. The absence of that from the pooled model is a clear disadvantage of it. As a whole, the suitability of the hierarchical model for modeling country-specific emissions can be seen in the work. With the amount of data used, the choice of prior distributions has almost no effect on the posterior distributions of means.
 
-The clear message of the work is that the countries' CO2 emissions are still high, and Finland is no exception. The development of China's emissions is worrying, and the high per capita values in the Middle East cannot be ignored. CO2 per capita emissions in many African countries are still small, but it is also good to think about future effects in a situation where emissions are rising sharply on that side of the globe. It is crucial to focus on exporting clean technology to countries that are still developing in order to prevent an explosive increase in emissions.
-
+The choice of our model made it possible to study the means of different countries very well, but in situations where emissions per capita changed greatly during the period under study, the hierarchical model did not predict correct behavior very well. If the main focus of the study had been on making predictions, a linear or nonlinear model formed from a time series would work better for that purpose.
 
 # 13. Self-reflection
-In this project, we understood a choice of prior distributions better than before on the course. The structure of the hierarchical model also became more familiar and its usefulness compared to other forms of modeling presented in the course became even more evident. Our R skills in both printing graphs and using stan improved a lot during the project, and it feels that R is a good option for use in working life as well. Of course, in addition to the above, our knowledge of the structure of global emissions and the evolution of CO$_2$ per capita in different countries was refined and updated.
+
+In general, the understanding about the course contents deepened a lot during the project work. In this project, we understood a choice of prior distributions better than before during the course. One of the biggest learning experiences during the project was to challenge ourselves to find best appropriate prior distributions and in that we believe we succeeded very well. Also, the structure of the hierarchical model became more familiar and its usefulness compared to other forms of modeling presented in the course became even more evident. In addition, we clearly saw during the project that the hierarchical and/or pooled model is not suitable for every situation and it was a good lesson to learn as well. Our R skills in both using Stan and printing graphs improved a lot during the project and it feels that R is a good option for use in working life as well. 
+
+It is also worth noting that our general knowledge about the current situation of global CO2-emissions and the evolution of CO$_2$ per capita in different countries was refined and updated.
+
+\newpage
+
+# Appendixes
 
 ```{r eval=FALSE}
-pooled_plotters <- function() {
-  pooled_df =data.frame(rstan::extract(pool_fit, permuted=T))
+install.packages("bayestestR")
+install.packages("remotes")
+remotes::install_github("avehtari/BDA_course_Aalto",
+                        subdir = "rpackage", upgrade="never")
+```
+
+## 2.2 Plotting the samples
+
+```{r eval=FALSE, tidy=FALSE}
+# Read data to data frame
+data_co2 <- read.csv("./data_co2.csv")
+data_population <- head(read.csv("./data_population.csv"), -1)
+data_co2_population = data_co2*10^6/data_population
+
+# We discovered that the CO2-emissions difference between our selected countries is so vast
+# that it's better to split the data into two different plots.
+
+df_data1 <- data_co2[, (data_co2[dim(data_co2)[1], ]) >= 100]
+df_data1 <- df_data1[,order(df_data1[69,])]
+df_data1_2 <- data.frame(years=seq(1950,2018), df_data1)
+df_plot1 <- melt(data = df_data1_2, id.vars = "years", variable.name = "Country")
+
+
+df_data2 <- data_co2[, (data_co2[dim(data_co2)[1], ]) < 100]
+df_data2 <- df_data2[,order(df_data2[69,])]
+df_data2_2 <- data.frame(years=seq(1950,2018), df_data2)
+df_plot2 <- melt(data = df_data2_2, id.vars = "years", variable.name = "Country")
+
+# Population
+
+df_data4 <- data.frame(years=seq(1950,2018), data_co2_population)
+df_data4 <- df_data4[,order(df_data4[69,])]
+df_plot4 <- melt(data = df_data4, id.vars = "years", variable.name = "Country")
+
+
+plot1 <- ggplot(df_plot1, aes(x=years, y=value, colour=Country)) +
+        geom_line() +
+        ggtitle("Plot 1. \nSample countries' CO2-emissions: \nbig emitters") +
+        xlab("Year") +
+        ylab("CO2-emissions / Billion tonns") +
+        labs(colour = "IOC Country Code") +
+        theme(
+          axis.title.x = element_text(face = "bold"),
+          axis.title.y = element_text(face = "bold"))
+
+plot2 <- ggplot(df_plot2, aes(x=years, y=value, colour=Country)) +
+        geom_line() +
+        ggtitle("Plot 2. \nSample countries' CO2-emissions: \nsmall emitters") +
+        xlab("Year") +
+        ylab("CO2-emissions / Billion tonns") +
+        labs(colour = "IOC Country Code") +
+        theme(
+          axis.title.x = element_text(face = "bold"),
+          axis.title.y = element_text(face = "bold"))
+
+plot4 <- ggplot(df_plot4, aes(x=years, y=value, colour=Country)) +
+        geom_line() +
+        ggtitle("Plot 3. \nStandardized CO2-emissions") +
+        xlab("Year") +
+        ylab("CO2 Per Capita / Kilo tonns") +
+        labs(colour = "IOC Country Code") +
+        theme(
+          axis.title.x = element_text(face = "bold"),
+          axis.title.y = element_text(face = "bold"))
+```
+
+```{r fig4, fig.height=12, fig.width=10, fig.align="center", eval=FALSE}
+
+grid.arrange(
+  grobs = list(plot1, plot2, plot4),
+  layout_matrix = rbind(c(1, 1, 2, 2),
+                        c(3, 3, 3, 3),
+                        c(3, 3, 3, 3))
+)
+```
+
+## 8. Posterior predictive checks
+
+```{r fig5, fig.height=4, fig.width=8, fig.align="center", eval=FALSE}
+pooled_df = data.frame(rstan::extract(pool_fit, permuted=T))
   
-  #Histogram
-  hist(pooled_df$mu, 
-       breaks = 100,
-       xlim=c(0,22),
-       xlab = "Mean of the quality measurements",
-       col = "lightyellow",
-       main="Posterior distribution of the mean of the sixth machine")
-}
+#Histogram
+ggplot(pooled_df, aes(x=ypred)) +
+  geom_histogram(bins = 100,
+                 color = "black",
+                 fill = "lightyellow") +
+  ggtitle("Plot 4. \nPooled model: Predictive distribution of the mean") +
+  xlab("Mean of the dataset") +
+  ylab("")
+
+
+hier_df = data.frame(rstan::extract(hier_fit, permuted=T))
+hier_hist_df <- melt(hier_df %>% select(starts_with('y_pred')))
+theme_set(
+  theme_classic() +
+    theme(legend.position = "top")
+  )
+ggplot(hier_hist_df, aes(x = value)) +
+  geom_histogram(aes(color = variable, fill = variable),
+                 alpha=0.4,
+                 bins=100,
+                 position = "identity") +
+  scale_fill_manual(values = c("#6E2C37", "#E7B800", "#0087DB"), 
+                    name = "", 
+                    labels = c("New Country", "Saudi-Arabia", "Finland")) +
+  scale_color_manual(values = c("#6E2C37", "#E7B800", "#0087DB"), 
+                     name = "", 
+                     labels = c("New Country", "Saudi-Arabia", "Finland")) +
+  geom_vline(aes(xintercept=mean(hier_df$y_pred_FIN)),
+             linetype = "dashed") +
+  geom_vline(aes(xintercept=mean(hier_df$y_pred_SAU)),
+             linetype = "dashed") +
+  geom_vline(aes(xintercept=mean(hier_df$y_pred_new_country)),
+             linetype = "dashed") +
+  ggtitle("Plot 5. \nHierarchical model: Predictive distributions of means of selected countries.") +
+        xlab("CO2-emissions per capita") +
+        ylab("") +
+  theme(legend.position="top")
 ```
 
 ```{r eval=FALSE}
-hierarchical_plotters <- function() {
-  hierarchical_df =data.frame(rstan::extract(hier_fit, permuted=T))
-  
-  #MCMC Areas
-  mcmc_areas_df <- hierarchical_df %>% select(starts_with('mu')) %>%
-                    setNames(colnames(data_co2_population))
-  mcmc_areas(mcmc_areas_df) + xlab("Testttttttt")
-  
-  #Histograms of countries together
-  m <- 19
-  {
-  plot(0,0,type="n",
-        xlim=c(0,20), ylim=c(0,1100),
-        xlab="x",ylab="freq", 
-        main="Histograms of each country separately, plotted together")
-    for(n in 1:m) {
-      var_name <- paste("mu.",n, sep="")
-      #hier_matrix[n,] <- unlist(hierarchical_df[var_name])
-      plot(
-        hist(unlist(hierarchical_df[var_name]), breaks = 12, plot=FALSE),
-        col=alpha('blue', 0.25),
-        add=T # Add to main plot
-        )  
-    }
-  }
-  
-  #One histogram for whole data
-  one_hist_data <- unlist(hierarchical_df %>% select(starts_with('mu')))
-  plot(hist(one_hist_data, breaks = 100, xlim = c(0,22), ylim = c(0, 5000)),
-            col = 'lightblue')
+mcse_all <- bayestestR::mcse(hier_fit)
+mcse_new <- round(mcse_all$MCSE[22], 2)
+mcse_sau <- round(mcse_all$MCSE[23], 2)
+mcse_fin <- round(mcse_all$MCSE[24], 2)
 
-}
+mean_new <- round(mean(hier_df$y_pred_new_country), 1)
+mean_sau <- round(mean(hier_df$y_pred_SAU), 1)
+mean_fin <- round(mean(hier_df$y_pred_FIN), 1)
 
+msce_quantile_new_low <- mcse_quantile(hier_df$y_pred_new_country, 0.05)$mcse
+msce_quantile_new_high <- mcse_quantile(hier_df$y_pred_new_country, 0.95)$mcse
+
+msce_quantile_sau_low <- mcse_quantile(hier_df$y_pred_SAU, 0.05)$mcse
+msce_quantile_sau_high <- mcse_quantile(hier_df$y_pred_SAU, 0.95)$mcse
+
+msce_quantile_fin_low <- mcse_quantile(hier_df$y_pred_FIN, 0.05)$mcse
+msce_quantile_fin_high <- mcse_quantile(hier_df$y_pred_FIN, 0.95)$mcse
+
+quantile_new <- round(quantile(hier_df$y_pred_new_country, c(0.05, 0.95)), 0)
+quantile_sau <- round(quantile(hier_df$y_pred_SAU, c(0.05, 0.95)), 0)
+quantile_fin <- round(quantile(hier_df$y_pred_FIN, c(0.05, 0.95)), 1)
 ```
+
+## 10.2 Plotting the results
+
+```{r fig6, fig.height=12, fig.width=8, fig.align="center", eval=FALSE, message=FALSE, warning=FALSE}
+hier_model <- rstan::stan_model(file = "hier_model_stan_without_loglik.stan");
+differing_priors <- NULL
+
+#Finland
+#Real model Finland
+hier_data_real <- list(N = nrow(data_co2_population),
+                  N_c = ncol(data_co2_population),
+                  y = data_co2_population,
+                  hyper_mu_in_mu = 2.58,
+                  hyper_mu_in_sigma = .5,
+                  hyper_sigma_in_alpha = 2.5,
+                  hyper_sigma_in_beta = .8,
+                  common_sigma_in = 2.5)
+
+hier_fit_real <- rstan::sampling(object = hier_model,
+                            data = hier_data_real,
+                            iter = 2000,
+                            warmup = 1000,
+                            refresh = 0)
+
+mid_result_real = data.frame(rstan::extract(hier_fit_real, permuted=T))
+differing_priors$Finland_Used <- mid_result_real$y_pred_FIN
+differing_priors <- as.data.frame(differing_priors)
+
+
+#Relaxed model Finland
+hier_data_relax <- list(N = nrow(data_co2_population),
+                  N_c = ncol(data_co2_population),
+                  y = data_co2_population,
+                  hyper_mu_in_mu = 5.0,
+                  hyper_mu_in_sigma = .5,
+                  hyper_sigma_in_alpha = 2,
+                  hyper_sigma_in_beta = 50,
+                  common_sigma_in = 2.5)
+
+hier_fit_relax <- rstan::sampling(object = hier_model,
+                            data = hier_data_relax,
+                            iter = 2000,
+                            warmup = 1000,
+                            refresh = 0)
+
+mid_result_relax = data.frame(rstan::extract(hier_fit_relax, permuted=T))
+differing_priors$Finland_Relaxed <- mid_result_relax$y_pred_FIN
+
+
+#Tightened model Finland
+hier_data_tight <- list(N = nrow(data_co2_population),
+                  N_c = ncol(data_co2_population),
+                  y = data_co2_population,
+                  hyper_mu_in_mu = 0.01,
+                  hyper_mu_in_sigma = 1,
+                  hyper_sigma_in_alpha = 1.1,
+                  hyper_sigma_in_beta = 0.6,
+                  common_sigma_in = 2.5)
+
+hier_fit_tight <- rstan::sampling(object = hier_model,
+                            data = hier_data_tight,
+                            iter = 2000,
+                            warmup = 1000,
+                            refresh = 0)
+
+mid_result_tight = data.frame(rstan::extract(hier_fit_tight, permuted=T))
+differing_priors$Finland_Tightened <- mid_result_tight$y_pred_FIN
+
+#New country
+#Real model new country
+differing_priors$NewCountry_Used <- mid_result_real$y_pred_new_country
+
+
+#Relaxed model new country
+differing_priors$NewCountry_Relaxed <- mid_result_relax$y_pred_new_country
+
+
+#Tightened model new country
+differing_priors$NewCountry_Tightened <- mid_result_tight$y_pred_new_country
+
+
+#MCMC Areas
+mcmc_areas(differing_priors) + 
+  xlab("CO2-emissions per capita (Kilo tons)") +
+  ggtitle("Plot 8. \nPredictive distributions with different priors.")
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
